@@ -1,5 +1,9 @@
 #include <iostream>
 
+#include "methods/euler.hpp"
+#include "system.hpp"
+
 int main() {
-    std::cout << "haha" << std::endl;
+    System s(100);
+    s.run();
 }
