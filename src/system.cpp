@@ -12,36 +12,32 @@ void System::step() {
     double dist_squared = p1.dist_squared(p2);
     double dist = std::sqrt(dist_squared);
 
-    double dx = p1.x - p2.x;
-    double dy = p1.y - p2.y;
-    double dz = p1.z - p2.z;
+    double dx = p2.x - p1.x;
+    double dy = p2.y - p1.y;
+    double dz = p2.z - p1.z;
 
     // forces
-    double dvx1 = -gamma * m2 * dx / dist_squared * dist;
-    double dvy1 = -gamma * m2 * dy / dist_squared * dist;
-    double dvz1 = -gamma * m2 * dz / dist_squared * dist;
-
-    double dvx2 = gamma * m1 * dx / dist_squared * dist;
-    double dvy2 = gamma * m1 * dy / dist_squared * dist;
-    double dvz2 = gamma * m1 * dz / dist_squared * dist;
+    double dvx = gamma * m1 * m2 * dx / (dist_squared * dist);
+    double dvy = gamma * m1 * m2 * dy / (dist_squared * dist);
+    double dvz = gamma * m1 * m2 * dz / (dist_squared * dist);
 
     // speeds
-    v1.x += dvx1 * dt;
-    v1.y += dvy1 * dt;
-    v1.z += dvz1 * dt;
+    v1.x += dvx * dt;
+    v1.y += dvy * dt;
+    v1.z += dvz * dt;
 
-    v2.x += dvx2 * dt;
-    v2.y += dvy2 * dt;
-    v2.z += dvz2 * dt;
+    v2.x -= dvx * dt;
+    v2.y -= dvy * dt;
+    v2.z -= dvz * dt;
 
     // pos
-    p1.x += v1.x;
-    p1.y += v1.y;
-    p1.z += v1.z;
+    p1.x += v1.x * dt / m1;
+    p1.y += v1.y * dt / m1;
+    p1.z += v1.z * dt / m1;
 
-    p2.x += v2.x;
-    p2.y += v2.y;
-    p2.z += v2.z;
+    p2.x += v2.x * dt / m2;
+    p2.y += v2.y * dt / m2;
+    p2.z += v2.z * dt / m2;
 
     print();
 }

@@ -1,0 +1,9 @@
+#!/usr/bin/bash
+
+cmake -B build -G Ninja
+cmake --build build
+
+build/src/main > out.txt
+
+cd visu
+venv/bin/manim -p anim.py
