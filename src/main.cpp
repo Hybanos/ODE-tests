@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "methods/euler.hpp"
+#include "methods.hpp"
 #include "system.hpp"
 
 int main() {

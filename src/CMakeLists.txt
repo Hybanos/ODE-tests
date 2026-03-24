@@ -4,7 +4,7 @@ target_sources(main PRIVATE
     main.cpp
     
     system.cpp
-    methods/euler.cpp
+    methods.cpp
 )
 
 include_directories(../include)

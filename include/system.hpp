@@ -5,7 +5,7 @@
 #include <functional>
 
 #include "vec3.hpp"
-#include "methods/euler.hpp"
+#include "methods.hpp"
 
 class System {
     private:
