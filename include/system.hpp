@@ -1,7 +1,11 @@
+#pragma once
+
 #include <iostream>
 #include <cmath>
+#include <functional>
 
 #include "vec3.hpp"
+#include "methods/euler.hpp"
 
 class System {
     private:
@@ -21,6 +25,16 @@ class System {
         vec3 v1 = {0,-10, 0};
         vec3 v2 = {0, 10, 0};
 
+        // vec3 f();
+        std::function<vec3()> f = [=](){
+            double dist_squared = p1.dist_squared(p2);
+            double dist = std::sqrt(dist_squared);
+
+            vec3 dx = p2 - p1;
+            vec3 dv = dx * gamma * m1 * m2 / (dist_squared * dist);
+    
+            return dv;
+        };
         void step();
         void print();
     public:

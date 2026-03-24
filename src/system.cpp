@@ -9,17 +9,10 @@ void System::run() {
 }
 
 void System::step() {
-    double dist_squared = p1.dist_squared(p2);
-    double dist = std::sqrt(dist_squared);
-
-    vec3 dx = p2 - p1;
-
-    // forces
-    vec3 dv = dx * gamma * m1 * m2 / (dist_squared * dist);
 
     // speeds
-    v1 = v1 + dv * dt;
-    v2 = v2 - dv * dt;
+    v1 = v1 + euler(f, dt);
+    v2 = v2 - euler(f, dt); 
 
     // pos
     p1 = p1 + v1 * dt / m1;
