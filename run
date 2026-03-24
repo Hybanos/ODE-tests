@@ -1,9 +1,14 @@
 #!/usr/bin/bash
 
-cmake -B build -G Ninja
-cmake --build build
+cmake -B build -G Ninja || exit
+cmake --build build || exit
 
-build/src/main > out.txt
+build/src/main > out.txt || exit
 
 cd visu
-venv/bin/manim -p anim.py
+
+if [ ! -d ./venv ]; then
+     python3 -m venv venv
+fi
+
+venv/bin/manim -qm -p anim.py || exit
