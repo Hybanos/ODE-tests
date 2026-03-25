@@ -3,14 +3,16 @@
 #include "methods.hpp"
 
 int main() {
-    int steps = 3000;
+    int steps = 30000;
 
     Euler s1(steps);
     s1.run();
 
-    RK21 s2(steps);
+    // RK21
+    RK2 s2(steps, 1.0);
     s2.run();
 
-    RK22 s3(steps);
+    // RK22
+    RK2 s3(steps, 0.5);
     s3.run();
 }

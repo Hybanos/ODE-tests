@@ -25,7 +25,7 @@ class System {
         vec3 p1 = {-1, 0, 0};       
         vec3 p2 = { 1, 0, 0};       
 
-        vec3 v1 = {0,-0.3, 0};
+        vec3 v1 = {0,-0.6 / m1, 0};
         vec3 v2 = {0, 0.6, 0};
 
         virtual void step() = 0;

@@ -28,14 +28,10 @@ class Euler : public System {
         Euler(int steps) : System{"Euler", steps} {}
 };
 
-class RK21 : public System {
+class RK2 : public System {
+    private:
+        double theta;
     public:
         void step();
-        RK21(int steps) : System{"RK21", steps} {}
-};
-
-class RK22 : public System {
-    public:
-        void step();
-        RK22(int steps) : System{"RK22", steps} {}
+        RK2(int steps, double _theta) : System{std::string("RK2") + std::to_string((int) (1 / _theta)), steps}, theta{_theta} {}
 };
