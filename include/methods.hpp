@@ -33,3 +33,9 @@ class RK21 : public System {
         void step();
         RK21(int steps) : System{"RK21", steps} {}
 };
+
+class RK22 : public System {
+    public:
+        void step();
+        RK22(int steps) : System{"RK22", steps} {}
+};

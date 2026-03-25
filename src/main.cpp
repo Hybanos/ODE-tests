@@ -10,4 +10,7 @@ int main() {
 
     RK21 s2(steps);
     s2.run();
+
+    RK22 s3(steps);
+    s3.run();
 }

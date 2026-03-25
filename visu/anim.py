@@ -1,14 +1,14 @@
 from manim import *
 import numpy as np
 
-files = ["../Euler.txt", "../RK21.txt"]
+files = ["../Euler.txt", "../RK21.txt", "../RK22.txt"]
 
 class Haha(ThreeDScene):
     def construct(self):
         axes = ThreeDAxes(
-            (-200, 200, 100),
-            (-200, 200, 100),
-            (-200, 200, 100),
+            (-4, 4, 1),
+            (-4, 4, 1),
+            (-4, 4, 1),
         )
         self.add(axes)
         self.set_camera_orientation(phi=30*DEGREES, theta=-45*DEGREES)
@@ -28,6 +28,8 @@ class Haha(ThreeDScene):
             v2 = data[12:15].T
 
             m_scale = max(m1[0], m2[0])
+
+            # barycenter_speed = (v1[0] * m1[0] + v2[0] * m2[0]) / (m1[0] + m2[0])
 
             path1 = VMobject(stroke_color=colors[i], stroke_opacity=0.7, stroke_width=2).set_points_as_corners(axes.c2p(p1))
             path2 = VMobject(stroke_color=colors[i], stroke_opacity=0.7, stroke_width=2).set_points_as_corners(axes.c2p(p2))

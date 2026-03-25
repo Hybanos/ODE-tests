@@ -48,42 +48,73 @@ void Euler::step() {
 
     // accel 
     vec3 r  = p2 - p1;
-    vec3 dv = r * gamma * m1 * m2 / (dist_squared * dist);
+    vec3 dv = r * gamma / (dist_squared * dist);
 
     // speeds
-    v1 = v1 + dv * dt;
-    v2 = v2 - dv * dt; 
+    v1 = v1 + dv * dt * m2;
+    v2 = v2 - dv * dt * m1; 
 
     // pos
-    p1 = p1 + v1 * dt / m1;
-    p2 = p2 + v2 * dt / m2;
+    p1 = p1 + v1 * dt;
+    p2 = p2 + v2 * dt;
 }
 
 void RK21::step() {
 
     // first step
-    double dist_squared = p1.dist_squared(p2);
-    double dist = std::sqrt(dist_squared);
+    double dist_squared_star = p1.dist_squared(p2);
+    double dist_star = std::sqrt(dist_squared_star);
 
-    vec3 r  = p2 - p1;
-    vec3 dv = r * gamma * m1 * m2 / (dist_squared * dist);
+    vec3 r_star  = p2 - p1;
+    vec3 dv_star = r_star * gamma / (dist_squared_star * dist_star);
 
-    vec3 v1_star = v1 + dv * dt;
-    vec3 v2_star = v2 - dv * dt; 
+    vec3 v1_star = v1 + dv_star * dt * m2;
+    vec3 v2_star = v2 - dv_star * dt * m1; 
 
-    vec3 p1_star = p1 + v1_star * dt / m1;
-    vec3 p2_star = p2 + v2_star * dt / m2;
+    vec3 p1_star = p1 + v1_star * dt;
+    vec3 p2_star = p2 + v2_star * dt;
 
     // second step
-    dist_squared = p1_star.dist_squared(p2_star);
-    dist = std::sqrt(dist_squared);
+    double dist_squared = p1_star.dist_squared(p2_star);
+    double dist = std::sqrt(dist_squared);
 
-    r  = p2_star - p1_star;
-    dv = r * gamma * m1 * m2 / (dist_squared * dist);
+    vec3 r  = p2_star - p1_star;
+    vec3 dv = r * gamma / (dist_squared * dist);
 
-    v1 = v1 + dv * dt;
-    v2 = v2 - dv * dt; 
+    v1 = v1_star + dv * dt * m2;
+    v2 = v2_star - dv * dt * m1; 
 
     p1 = p1 + (v1 + v1_star) * 0.5 * dt;
     p2 = p2 + (v2 + v2_star) * 0.5 * dt;
+}
+
+void RK22::step() {
+
+    double theta = 0.5;
+
+    // first step
+    double dist_squared_star = p1.dist_squared(p2);
+    double dist_star = std::sqrt(dist_squared_star);
+
+    vec3 r_star  = p2 - p1;
+    vec3 dv_star = r_star * gamma / (dist_squared_star * dist_star);
+
+    vec3 v1_star = v1 + dv_star * dt * m2;
+    vec3 v2_star = v2 - dv_star * dt * m1; 
+
+    vec3 p1_star = p1 + v1_star * dt * theta;
+    vec3 p2_star = p2 + v2_star * dt * theta;
+
+    // second step
+    double dist_squared = p1_star.dist_squared(p2_star);
+    double dist = std::sqrt(dist_squared);
+
+    vec3 r  = p2_star - p1_star;
+    vec3 dv = r * gamma / (dist_squared * dist);
+
+    v1 = v1_star + dv * dt * m2;
+    v2 = v2_star - dv * dt * m1; 
+
+    p1 = p1 + v1_star * (1 - 1 / (2 * theta)) * dt + v1 * 1 / (2 * theta) * dt;
+    p2 = p2 + v2_star * (1 - 1 / (2 * theta)) * dt + v2 * 1 / (2 * theta) * dt;
 }

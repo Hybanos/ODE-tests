@@ -13,20 +13,20 @@ class System {
 
         int max_t;
 
-        double gamma = 1e5;
+        double gamma = 1;
 
         double t = 0.0;
-        double dt = 0.04;
+        double dt = 0.01;
         int steps = 0;
 
         double m1 = 2.0;
         double m2 = 1.0;
 
-        vec3 p1 = {-100, 0, 0};       
-        vec3 p2 = { 100, 0, 0};       
+        vec3 p1 = {-1, 0, 0};       
+        vec3 p2 = { 1, 0, 0};       
 
-        vec3 v1 = {0,-20, 0};
-        vec3 v2 = {0, 20, 0};
+        vec3 v1 = {0,-0.3, 0};
+        vec3 v2 = {0, 0.6, 0};
 
         virtual void step() = 0;
         void print();
