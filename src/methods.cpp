@@ -58,3 +58,32 @@ void Euler::step() {
     p1 = p1 + v1 * dt / m1;
     p2 = p2 + v2 * dt / m2;
 }
+
+void RK21::step() {
+
+    // first step
+    double dist_squared = p1.dist_squared(p2);
+    double dist = std::sqrt(dist_squared);
+
+    vec3 r  = p2 - p1;
+    vec3 dv = r * gamma * m1 * m2 / (dist_squared * dist);
+
+    vec3 v1_star = v1 + dv * dt;
+    vec3 v2_star = v2 - dv * dt; 
+
+    vec3 p1_star = p1 + v1_star * dt / m1;
+    vec3 p2_star = p2 + v2_star * dt / m2;
+
+    // second step
+    dist_squared = p1_star.dist_squared(p2_star);
+    dist = std::sqrt(dist_squared);
+
+    r  = p2_star - p1_star;
+    dv = r * gamma * m1 * m2 / (dist_squared * dist);
+
+    v1 = v1 + dv * dt;
+    v2 = v2 - dv * dt; 
+
+    p1 = p1 + (v1 + v1_star) * 0.5 * dt;
+    p2 = p2 + (v2 + v2_star) * 0.5 * dt;
+}

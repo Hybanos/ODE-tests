@@ -27,3 +27,9 @@ class Euler : public System {
         void step();
         Euler(int steps) : System{"Euler", steps} {}
 };
+
+class RK21 : public System {
+    public:
+        void step();
+        RK21(int steps) : System{"RK21", steps} {}
+};
