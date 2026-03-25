@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <vector>
 
 #include "vec3.hpp"
 #include "system.hpp"
@@ -19,13 +20,13 @@ class Exact : public System {
         vec3 compute_pos(double t);
     public:
         void step();
-        Exact(int steps);
+        Exact(int max_steps);
 };
 
 class Euler : public System {
     public:
         void step();
-        Euler(int steps) : System{"Euler", steps} {}
+        Euler(int max_steps) : System{"Euler", max_steps} {}
 };
 
 class RK2 : public System {
@@ -33,5 +34,15 @@ class RK2 : public System {
         double theta;
     public:
         void step();
-        RK2(int steps, double _theta) : System{std::string("RK2") + std::to_string((int) (1 / _theta)), steps}, theta{_theta} {}
+        RK2(int max_steps, double _theta) : System{std::string("RK2") + std::to_string((int) (1 / _theta)), max_steps}, theta{_theta} {}
+};
+
+class LinearMultistep : public System {
+    private:
+        int back_steps;
+        vec3 prev1;
+        vec3 prev2;
+    public:
+        void step();
+        LinearMultistep(int max_steps, int _back_steps);
 };

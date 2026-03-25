@@ -1,7 +1,11 @@
 from manim import *
 import numpy as np
 
-files = ["../Euler.txt", "../RK21.txt", "../RK22.txt"]
+files = []
+
+with open("../index.txt", "r") as f:
+    for l in f.read().strip().split("\n"):
+        files.append(f"../{l}.txt")
 
 class Haha(ThreeDScene):
     def construct(self):
@@ -29,8 +33,6 @@ class Haha(ThreeDScene):
 
             m_scale = max(m1[0], m2[0])
 
-            # barycenter_speed = (v1[0] * m1[0] + v2[0] * m2[0]) / (m1[0] + m2[0])
-
             path1 = VMobject(stroke_color=colors[i], stroke_opacity=0.7, stroke_width=2).set_points_as_corners(axes.c2p(p1))
             path2 = VMobject(stroke_color=colors[i], stroke_opacity=0.7, stroke_width=2).set_points_as_corners(axes.c2p(p2))
             dot1 = Dot3D(radius=DEFAULT_DOT_RADIUS * m1[0] / m_scale, color=colors[i])
@@ -46,7 +48,6 @@ class Haha(ThreeDScene):
             exec(f"dots[{i}].add_updater(lambda x: x.move_to(paths[{i}].get_end()))", globals=locals(), locals=globals())
 
         self.add(*dots)
-        # self.play(Create(path1, run_time=3, rate_func=linear), Create(path2, run_time=3, rate_func=linear))
         self.play(
             *[Create(path, run_time=10, rate_func=linear) for path in paths]
         )

@@ -9,14 +9,12 @@
 
 class System {
     protected:
-        std::string name;
-
         int max_t;
 
         double gamma = 1;
 
         double t = 0.0;
-        double dt = 0.01;
+        double dt = 0.001;
         int steps = 0;
 
         double m1 = 2.0;
@@ -32,6 +30,8 @@ class System {
         void print();
         void save(std::ofstream &f);
     public:
+        std::string name;
+
         System(std::string _name, int _max_t) : name{_name}, max_t{_max_t} {};
         void run();
 };

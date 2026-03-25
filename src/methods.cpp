@@ -1,6 +1,6 @@
 #include "methods.hpp"
 
-Exact::Exact(int steps) : System("Exact", steps) {
+Exact::Exact(int max_steps) : System("Exact", max_steps) {
     // vec3 r_1 = (p2 - p1) * m2 / (m1 + m2);
 
     barycenter_pos = (p1 * m1 + p2 * m2) / (m1 + m2);
@@ -32,6 +32,8 @@ Exact::Exact(int steps) : System("Exact", steps) {
 
 vec3 Exact::compute_pos(double t) {
     double M = mean_movement * t;
+    
+    return vec3{};
 }
 
 vec3 Exact::compute_barycenter(double t) {
@@ -86,5 +88,28 @@ void RK2::step() {
 
     p1 = p1 + v1_star * (1 - 1 / (2 * theta)) * dt + v1 * 1 / (2 * theta) * dt;
     p2 = p2 + v2_star * (1 - 1 / (2 * theta)) * dt + v2 * 1 / (2 * theta) * dt;
+}
 
+LinearMultistep::LinearMultistep(int max_steps, int _back_steps) : System{"LinearMultistep", max_steps}, back_steps{_back_steps} {
+
+};
+
+void LinearMultistep::step() {
+    double dist_squared = p1.dist_squared(p2);
+    double dist = std::sqrt(dist_squared);
+
+    // accel 
+    vec3 r  = p2 - p1;
+    vec3 dv = r * gamma / (dist_squared * dist);
+
+    // speeds
+    v1 = v1 + dv * dt * m2;
+    v2 = v2 - dv * dt * m1; 
+
+    // pos
+    p1 = p1 + (v1 * 1.5 - prev1 * 0.5) * dt;
+    p2 = p2 + (v2 * 1.5 - prev2 * 0.5) * dt;
+
+    prev1 = v1;
+    prev2 = v2;
 }
