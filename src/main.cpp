@@ -1,9 +1,13 @@
 #include <iostream>
 
-#include "methods/euler.hpp"
-#include "system.hpp"
+#include "methods.hpp"
 
 int main() {
-    System s(1000);
-    s.run();
+    int steps = 3000;
+
+    Euler s1(steps);
+    s1.run();
+
+    RK21 s2(steps);
+    s2.run();
 }

@@ -1,35 +1,25 @@
 #include "system.hpp"
 
 void System::run() {
+
+    std::ofstream f;
+    f.open(name + ".txt", std::ios::out);
+
     print();
-    while (t < max_t) {
+    save(f);
+    while (steps < max_t) {
         t += dt;
+        steps += 1;
         step();
+        print();
+        save(f);
     }
-}
 
-void System::step() {
-    double dist_squared = p1.dist_squared(p2);
-    double dist = std::sqrt(dist_squared);
-
-    vec3 dx = p2 - p1;
-
-    // forces
-    vec3 dv = dx * gamma * m1 * m2 / (dist_squared * dist);
-
-    // speeds
-    v1 = v1 + dv * dt;
-    v2 = v2 - dv * dt;
-
-    // pos
-    p1 = v1 * dt / m1 + p1;
-    p2 = v2 * dt / m2 + p2;
-
-    print();
+    f.close();
 }
 
 void System::print() {
-    std::cout << t  << ";"
+    std::cout << steps << ";"
               << m1 << ";" 
               << p1.x << ";" << p1.y << ";" << p1.z << ";"
               << v1.x << ";" << v1.y << ";" << v1.z << ";"
@@ -37,4 +27,15 @@ void System::print() {
               << p2.x << ";" << p2.y << ";" << p2.z << ";"
               << v2.x << ";" << v2.y << ";" << v2.z 
               << std::endl;
+}
+
+void System::save(std::ofstream &f) {
+    f << steps << ";"
+      << m1 << ";" 
+      << p1.x << ";" << p1.y << ";" << p1.z << ";"
+      << v1.x << ";" << v1.y << ";" << v1.z << ";"
+      << m2 << ";" 
+      << p2.x << ";" << p2.y << ";" << p2.z << ";"
+      << v2.x << ";" << v2.y << ";" << v2.z 
+      << std::endl;
 }
