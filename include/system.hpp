@@ -2,19 +2,22 @@
 
 #include <iostream>
 #include <cmath>
-#include <functional>
+#include <string>
+#include <fstream>
 
 #include "vec3.hpp"
-#include "methods.hpp"
 
 class System {
-    private:
+    protected:
+        std::string name;
+
         int max_t;
 
-        double gamma = 1e4;
+        double gamma = 1e5;
 
         double t = 0.0;
-        double dt = 1.0;
+        double dt = 0.04;
+        int steps = 0;
 
         double m1 = 2.0;
         double m2 = 1.0;
@@ -22,22 +25,13 @@ class System {
         vec3 p1 = {-100, 0, 0};       
         vec3 p2 = { 100, 0, 0};       
 
-        vec3 v1 = {0,-10, 0};
-        vec3 v2 = {0, 10, 0};
+        vec3 v1 = {0,-20, 0};
+        vec3 v2 = {0, 20, 0};
 
-        // vec3 f();
-        std::function<vec3()> f = [=](){
-            double dist_squared = p1.dist_squared(p2);
-            double dist = std::sqrt(dist_squared);
-
-            vec3 dx = p2 - p1;
-            vec3 dv = dx * gamma * m1 * m2 / (dist_squared * dist);
-    
-            return dv;
-        };
-        void step();
+        virtual void step() = 0;
         void print();
+        void save(std::ofstream &f);
     public:
-        System(int _max_t) : max_t{_max_t} {};
+        System(std::string _name, int _max_t) : name{_name}, max_t{_max_t} {};
         void run();
 };

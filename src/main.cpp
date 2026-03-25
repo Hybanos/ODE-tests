@@ -1,9 +1,9 @@
 #include <iostream>
 
 #include "methods.hpp"
-#include "system.hpp"
 
 int main() {
-    System s(1000);
+    Euler s(1000);
     s.run();
+    Exact s1(10);
 }

@@ -1,7 +1,29 @@
 #pragma once
+
 #include <cmath>
-#include <functional>
 
 #include "vec3.hpp"
+#include "system.hpp"
 
-vec3 euler(std::function<vec3(void)>f, double dt);
+class Exact : public System {
+    private:
+        vec3 barycenter_pos; 
+        vec3 barycenter_speed; 
+
+        double semi_major_axis;
+        double eccentricity;
+        double E_0;
+        double mean_movement;
+
+        vec3 compute_barycenter(double t);
+        vec3 compute_pos(double t);
+    public:
+        void step();
+        Exact(int steps);
+};
+
+class Euler : public System {
+    public:
+        void step();
+        Euler(int steps) : System{"Euler", steps} {}
+};

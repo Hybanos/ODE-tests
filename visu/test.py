@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # data = np.fromfile("out.txt", dtype=float)
-data = np.loadtxt("out.txt", delimiter=";").T
+data = np.loadtxt("Euler.txt", delimiter=";").T
 
 steps = data[0]
 m1 = data[1]

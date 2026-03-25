@@ -3,7 +3,7 @@
 cmake -B build -G Ninja || exit
 cmake --build build || exit
 
-build/src/main > out.txt || exit
+build/src/main exit
 
 cd visu
 
