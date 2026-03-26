@@ -47,25 +47,25 @@ void Exact::step() {
 void Euler::step() {
     vec3 a = compute_acceleration(p1, p2);
 
-    // speeds
-    v1 = v1 - a * dt * m2;
-    v2 = v2 + a * dt * m1; 
-
     // pos
     p1 = p1 + v1 * dt;
     p2 = p2 + v2 * dt;
+
+    // speeds
+    v1 = v1 - a * dt * m2;
+    v2 = v2 + a * dt * m1; 
 }
 
 void EulerSwapped::step() {
     vec3 a = compute_acceleration(p1, p2);
 
-    // pos
-    p1 = p1 + v1 * dt;
-    p2 = p2 + v2 * dt;
-
     // speeds
     v1 = v1 - a * dt * m2;
     v2 = v2 + a * dt * m1; 
+
+    // pos
+    p1 = p1 + v1 * dt;
+    p2 = p2 + v2 * dt;
 }
 
 void Leapfrog::step() {
