@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-cmake -B build -G Ninja || exit
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release || exit
 cmake --build build || exit
 
 build/src/main exit

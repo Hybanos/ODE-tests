@@ -131,9 +131,6 @@ LinearMultistep::LinearMultistep(int max_steps, int _back_steps) : System{"Linea
 
 void LinearMultistep::step() {
     vec3 a = compute_acceleration(p1, p2);
-    // speeds
-    v1 = v1 - a * dt * m2;
-    v2 = v2 + a * dt * m1; 
 
     // pos
     p1 = p1 + (v1 * 1.5 - prev1 * 0.5) * dt;
@@ -141,4 +138,9 @@ void LinearMultistep::step() {
 
     prev1 = v1;
     prev2 = v2;
+
+    // speeds
+    v1 = v1 - a * dt * m2;
+    v2 = v2 + a * dt * m1; 
+
 }

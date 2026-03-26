@@ -7,13 +7,13 @@ int main() {
     int steps = 3e4;
 
     System* systems[] = {
-        // new Euler(steps),
+        new Euler(steps),
         // new EulerSwapped(steps),
         // // new Leapfrog(steps),
-        new RK2(steps, 1.0),
+        // new RK2(steps, 1.0),
         // new RK2(steps, 0.5),
-        new RK4(steps),
-        // new LinearMultistep(steps, 1)
+        // new RK4(steps),
+        new LinearMultistep(steps, 1)
     };
 
     std::ofstream f; 
