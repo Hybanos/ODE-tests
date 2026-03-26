@@ -35,6 +35,12 @@ class EulerSwapped : public System {
         EulerSwapped(int max_steps) : System{"EulerSwapped", max_steps} {}
 };
 
+class Leapfrog : public System {
+    public:
+        void step();
+        Leapfrog(int max_steps) : System{"Leapfrog", max_steps} {}
+};
+
 class RK2 : public System {
     private:
         double theta;

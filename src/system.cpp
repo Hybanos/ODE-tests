@@ -18,7 +18,7 @@ void System::run() {
         steps += 1;
         step();
         compute_energies();
-        save(f);
+        if (!(steps % 1)) save(f);
     }
 
     f.close();
@@ -26,6 +26,16 @@ void System::run() {
     time_point<high_resolution_clock> t2 = high_resolution_clock::now();
     std::cout << name << ": ";
     std::cout << (t2 - t1).count() / 1e9 << "s" << std::endl;
+}
+
+vec3 System::compute_acceleration(vec3 x1, vec3 x2) {
+    double dist_squared = x1.dist_squared(x2);
+    double dist = std::sqrt(dist_squared);
+
+    vec3 r  = x2 - x1;
+    vec3 dv = r * gamma / (dist_squared * dist);
+
+    return dv;
 }
 
 void System::compute_energies() {

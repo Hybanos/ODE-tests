@@ -45,16 +45,11 @@ void Exact::step() {
 }
 
 void Euler::step() {
-    double dist_squared = p1.dist_squared(p2);
-    double dist = std::sqrt(dist_squared);
-
-    // accel 
-    vec3 r  = p2 - p1;
-    vec3 dv = r * gamma / (dist_squared * dist);
+    vec3 a = compute_acceleration(p1, p2);
 
     // speeds
-    v1 = v1 + dv * dt * m2;
-    v2 = v2 - dv * dt * m1; 
+    v1 = v1 + a * dt * m2;
+    v2 = v2 - a * dt * m1; 
 
     // pos
     p1 = p1 + v1 * dt;
@@ -62,46 +57,44 @@ void Euler::step() {
 }
 
 void EulerSwapped::step() {
-    double dist_squared = p1.dist_squared(p2);
-    double dist = std::sqrt(dist_squared);
-
-    // accel 
-    vec3 r  = p2 - p1;
-    vec3 dv = r * gamma / (dist_squared * dist);
+    vec3 a = compute_acceleration(p1, p2);
 
     // pos
     p1 = p1 + v1 * dt;
     p2 = p2 + v2 * dt;
 
     // speeds
-    v1 = v1 + dv * dt * m2;
-    v2 = v2 - dv * dt * m1; 
+    v1 = v1 + a * dt * m2;
+    v2 = v2 - a * dt * m1; 
+}
+
+void Leapfrog::step() {
+    vec3 a = compute_acceleration(p1, p2);
+
+    p1 = p1 + v1 * dt + a * 0.5 * dt * dt * m2;
+    p2 = p2 + v2 * dt - a * 0.5 * dt * dt * m1;
+
+    vec3 ap1 = compute_acceleration(p1, p2);
+
+    v1 = v1 + (a + ap1) * 0.5 * dt * m2;
+    v2 = v2 - (a + ap1) * 0.5 * dt * m1;
 }
 
 void RK2::step() {
-
     // first step
-    double dist_squared_star = p1.dist_squared(p2);
-    double dist_star = std::sqrt(dist_squared_star);
+    vec3 a_star = compute_acceleration(p1, p2);
 
-    vec3 r_star  = p2 - p1;
-    vec3 dv_star = r_star * gamma / (dist_squared_star * dist_star);
-
-    vec3 v1_star = v1 + dv_star * dt * theta * m2;
-    vec3 v2_star = v2 - dv_star * dt * theta * m1; 
+    vec3 v1_star = v1 + a_star * dt * theta * m2;
+    vec3 v2_star = v2 - a_star * dt * theta * m1; 
 
     vec3 p1_star = p1 + v1_star * dt * theta;
     vec3 p2_star = p2 + v2_star * dt * theta;
 
     // second step
-    double dist_squared = p1_star.dist_squared(p2_star);
-    double dist = std::sqrt(dist_squared);
+    vec3 a = compute_acceleration(p1_star, p2_star);
 
-    vec3 r  = p2_star - p1_star;
-    vec3 dv = r * gamma / (dist_squared * dist);
-
-    v1 = v1 + dv * dt * m2;
-    v2 = v2 - dv * dt * m1; 
+    v1 = v1 + a * dt * m2;
+    v2 = v2 - a * dt * m1; 
 
     p1 = p1 + v1_star * (1 - 1 / (2 * theta)) * dt + v1 * 1 / (2 * theta) * dt;
     p2 = p2 + v2_star * (1 - 1 / (2 * theta)) * dt + v2 * 1 / (2 * theta) * dt;
@@ -112,16 +105,10 @@ LinearMultistep::LinearMultistep(int max_steps, int _back_steps) : System{"Linea
 };
 
 void LinearMultistep::step() {
-    double dist_squared = p1.dist_squared(p2);
-    double dist = std::sqrt(dist_squared);
-
-    // accel 
-    vec3 r  = p2 - p1;
-    vec3 dv = r * gamma / (dist_squared * dist);
-
+    vec3 a = compute_acceleration(p1, p2);
     // speeds
-    v1 = v1 + dv * dt * m2;
-    v2 = v2 - dv * dt * m1; 
+    v1 = v1 + a * dt * m2;
+    v2 = v2 - a * dt * m1; 
 
     // pos
     p1 = p1 + (v1 * 1.5 - prev1 * 0.5) * dt;

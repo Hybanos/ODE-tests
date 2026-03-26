@@ -10,9 +10,9 @@ with open("../index.txt", "r") as f:
 class Haha(ThreeDScene):
     def construct(self):
         axes = ThreeDAxes(
-            (-4, 4, 1),
-            (-4, 4, 1),
-            (-4, 4, 1),
+            (-2, 2, 1),
+            (-2, 2, 1),
+            (-2, 2, 1),
         )
         self.add(axes)
         self.set_camera_orientation(phi=30*DEGREES, theta=-45*DEGREES)

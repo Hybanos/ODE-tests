@@ -30,6 +30,7 @@ class System {
         // kinetic and potential energies
         double K, U;
 
+        vec3 compute_acceleration(vec3 x1, vec3 x2);
         void compute_energies();
         virtual void step() = 0;
         void save(std::ofstream &f);
