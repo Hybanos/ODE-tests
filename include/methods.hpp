@@ -29,6 +29,12 @@ class Euler : public System {
         Euler(int max_steps) : System{"Euler", max_steps} {}
 };
 
+class EulerSwapped : public System {
+    public:
+        void step();
+        EulerSwapped(int max_steps) : System{"EulerSwapped", max_steps} {}
+};
+
 class RK2 : public System {
     private:
         double theta;

@@ -22,7 +22,7 @@ class Haha(ThreeDScene):
         colors = color_gradient([BLUE, ORANGE], len(files)) 
 
         for i, f in enumerate(files):
-            data = np.loadtxt(f, delimiter=";").T
+            data = np.loadtxt(f, delimiter=";", skiprows=1).T
             steps = data[0]
             m1 = data[1]
             p1 = data[2:5].T
@@ -49,5 +49,5 @@ class Haha(ThreeDScene):
 
         self.add(*dots)
         self.play(
-            *[Create(path, run_time=10, rate_func=linear) for path in paths]
+            *[Create(path, run_time=5, rate_func=linear) for path in paths]
         )

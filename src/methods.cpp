@@ -61,6 +61,23 @@ void Euler::step() {
     p2 = p2 + v2 * dt;
 }
 
+void EulerSwapped::step() {
+    double dist_squared = p1.dist_squared(p2);
+    double dist = std::sqrt(dist_squared);
+
+    // accel 
+    vec3 r  = p2 - p1;
+    vec3 dv = r * gamma / (dist_squared * dist);
+
+    // pos
+    p1 = p1 + v1 * dt;
+    p2 = p2 + v2 * dt;
+
+    // speeds
+    v1 = v1 + dv * dt * m2;
+    v2 = v2 - dv * dt * m1; 
+}
+
 void RK2::step() {
 
     // first step

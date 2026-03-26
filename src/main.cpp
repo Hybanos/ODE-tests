@@ -7,10 +7,11 @@ int main() {
     int steps = 30000;
 
     System* systems[] = {
-        // new Euler(steps),
-        new RK2(steps, 1.0),
+        new Euler(steps),
+        new EulerSwapped(steps),
+        // new RK2(steps, 1.0),
         // new RK2(steps, 0.5),
-        new LinearMultistep(steps, 1)
+        // new LinearMultistep(steps, 1)
     };
 
     std::ofstream f; 

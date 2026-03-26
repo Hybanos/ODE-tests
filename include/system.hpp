@@ -4,6 +4,7 @@
 #include <cmath>
 #include <string>
 #include <fstream>
+#include <chrono>
 
 #include "vec3.hpp"
 
@@ -26,8 +27,11 @@ class System {
         vec3 v1 = {0,-0.6 / m1, 0};
         vec3 v2 = {0, 0.6, 0};
 
+        // kinetic and potential energies
+        double K, U;
+
+        void compute_energies();
         virtual void step() = 0;
-        void print();
         void save(std::ofstream &f);
     public:
         std::string name;
