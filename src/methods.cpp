@@ -48,8 +48,8 @@ void Euler::step() {
     vec3 a = compute_acceleration(p1, p2);
 
     // speeds
-    v1 = v1 + a * dt * m2;
-    v2 = v2 - a * dt * m1; 
+    v1 = v1 - a * dt * m2;
+    v2 = v2 + a * dt * m1; 
 
     // pos
     p1 = p1 + v1 * dt;
@@ -64,8 +64,8 @@ void EulerSwapped::step() {
     p2 = p2 + v2 * dt;
 
     // speeds
-    v1 = v1 + a * dt * m2;
-    v2 = v2 - a * dt * m1; 
+    v1 = v1 - a * dt * m2;
+    v2 = v2 + a * dt * m1; 
 }
 
 void Leapfrog::step() {
@@ -76,16 +76,16 @@ void Leapfrog::step() {
 
     vec3 ap1 = compute_acceleration(p1, p2);
 
-    v1 = v1 + (a + ap1) * 0.5 * dt * m2;
-    v2 = v2 - (a + ap1) * 0.5 * dt * m1;
+    v1 = v1 - (a + ap1) * 0.5 * dt * m2;
+    v2 = v2 + (a + ap1) * 0.5 * dt * m1;
 }
 
 void RK2::step() {
     // first step
     vec3 a_star = compute_acceleration(p1, p2);
 
-    vec3 v1_star = v1 + a_star * dt * theta * m2;
-    vec3 v2_star = v2 - a_star * dt * theta * m1; 
+    vec3 v1_star = v1 - a_star * dt * theta * m2;
+    vec3 v2_star = v2 + a_star * dt * theta * m1; 
 
     vec3 p1_star = p1 + v1_star * dt * theta;
     vec3 p2_star = p2 + v2_star * dt * theta;
@@ -93,22 +93,47 @@ void RK2::step() {
     // second step
     vec3 a = compute_acceleration(p1_star, p2_star);
 
-    v1 = v1 + a * dt * m2;
-    v2 = v2 - a * dt * m1; 
-
     p1 = p1 + v1_star * (1 - 1 / (2 * theta)) * dt + v1 * 1 / (2 * theta) * dt;
     p2 = p2 + v2_star * (1 - 1 / (2 * theta)) * dt + v2 * 1 / (2 * theta) * dt;
+
+    v1 = v1 - a * dt * m2;
+    v2 = v2 + a * dt * m1; 
 }
 
-LinearMultistep::LinearMultistep(int max_steps, int _back_steps) : System{"LinearMultistep", max_steps}, back_steps{_back_steps} {
+void RK4::step() {
+    vec3 k1 = compute_acceleration(p1, p2);
 
-};
+    vec3 v1_2 = v1 - k1 * 0.5 * dt * m2;
+    vec3 v2_2 = v2 + k1 * 0.5 * dt * m1;
+    vec3 p1_2 = p1 + v1_2 * dt;
+    vec3 p2_2 = p2 + v2_2 * dt;
+    vec3 k2 = compute_acceleration(p1_2, p2_2);
+
+    vec3 v1_3 = v1 - k2 * 0.5 * dt * m2;
+    vec3 v2_3 = v2 + k2 * 0.5 * dt * m1;
+    vec3 p1_3 = p1 + v1_3 * dt;
+    vec3 p2_3 = p2 + v2_3 * dt;
+    vec3 k3 = compute_acceleration(p1_3, p2_3);
+
+    vec3 v1_4 = v1 - k3 * dt * m2;
+    vec3 v2_4 = v2 + k3 * dt * m1;
+    vec3 p1_4 = p1 + v1_4 * dt;
+    vec3 p2_4 = p2 + v2_4 * dt;
+    vec3 k4 = compute_acceleration(p1_4, p2_4);
+
+    p1 = p1 + v1 * dt;
+    p2 = p2 + v2 * dt;
+    v1 = v1 - (k1 + k2*2 + k3*2 + k4) * dt / 6 * m2;
+    v2 = v2 + (k1 + k2*2 + k3*2 + k4) * dt / 6 * m1;
+}
+
+LinearMultistep::LinearMultistep(int max_steps, int _back_steps) : System{"LinearMultistep", max_steps}, back_steps{_back_steps} {};
 
 void LinearMultistep::step() {
     vec3 a = compute_acceleration(p1, p2);
     // speeds
-    v1 = v1 + a * dt * m2;
-    v2 = v2 - a * dt * m1; 
+    v1 = v1 - a * dt * m2;
+    v2 = v2 + a * dt * m1; 
 
     // pos
     p1 = p1 + (v1 * 1.5 - prev1 * 0.5) * dt;

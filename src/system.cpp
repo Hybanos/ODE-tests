@@ -33,7 +33,7 @@ vec3 System::compute_acceleration(vec3 x1, vec3 x2) {
     double dist = std::sqrt(dist_squared);
 
     vec3 r  = x2 - x1;
-    vec3 dv = r * gamma / (dist_squared * dist);
+    vec3 dv = - r * gamma / (dist_squared * dist);
 
     return dv;
 }

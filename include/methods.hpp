@@ -49,6 +49,12 @@ class RK2 : public System {
         RK2(int max_steps, double _theta) : System{std::string("RK2") + std::to_string((int) (1 / _theta)), max_steps}, theta{_theta} {}
 };
 
+class RK4 : public System {
+    public:
+        void step();
+        RK4(int max_steps) : System{"RK4", max_steps} {}
+};
+
 class LinearMultistep : public System {
     private:
         int back_steps;
