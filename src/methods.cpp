@@ -1,7 +1,14 @@
 #include "methods.hpp"
 
-Exact::Exact(int max_steps) : System("Exact", max_steps) {
+Exact::Exact(int max_steps, int bodies, int seed=0) : System("Exact", max_steps, bodies, seed) {
     // vec3 r_1 = (p2 - p1) * m2 / (m1 + m2);
+
+    double &m1 = m[0];
+    double &m2 = m[1];
+    vec3 &p1 = x[0];
+    vec3 &p2 = x[1];
+    vec3 &v1 = v[0];
+    vec3 &v2 = v[1];
 
     barycenter_pos = (p1 * m1 + p2 * m2) / (m1 + m2);
     barycenter_speed = (v1 * m1 + v2 * m2) / (m1 + m2);
@@ -45,6 +52,13 @@ void Exact::step() {
 }
 
 void Euler::step() {
+    double &m1 = m[0];
+    double &m2 = m[1];
+    vec3 &p1 = x[0];
+    vec3 &p2 = x[1];
+    vec3 &v1 = v[0];
+    vec3 &v2 = v[1];
+
     vec3 a = compute_acceleration(p1, p2);
 
     // pos
@@ -57,6 +71,13 @@ void Euler::step() {
 }
 
 void EulerSwapped::step() {
+    double &m1 = m[0];
+    double &m2 = m[1];
+    vec3 &p1 = x[0];
+    vec3 &p2 = x[1];
+    vec3 &v1 = v[0];
+    vec3 &v2 = v[1];
+
     vec3 a = compute_acceleration(p1, p2);
 
     // speeds
@@ -69,6 +90,13 @@ void EulerSwapped::step() {
 }
 
 void Leapfrog::step() {
+    double &m1 = m[0];
+    double &m2 = m[1];
+    vec3 &p1 = x[0];
+    vec3 &p2 = x[1];
+    vec3 &v1 = v[0];
+    vec3 &v2 = v[1];
+
     vec3 a = compute_acceleration(p1, p2);
 
     p1 = p1 + v1 * dt + a * 0.5 * dt * dt * m2;
@@ -81,6 +109,13 @@ void Leapfrog::step() {
 }
 
 void RK2::step() {
+    double &m1 = m[0];
+    double &m2 = m[1];
+    vec3 &p1 = x[0];
+    vec3 &p2 = x[1];
+    vec3 &v1 = v[0];
+    vec3 &v2 = v[1];
+
     // first step
     vec3 a_star = compute_acceleration(p1, p2);
 
@@ -101,6 +136,13 @@ void RK2::step() {
 }
 
 void RK4::step() {
+    double &m1 = m[0];
+    double &m2 = m[1];
+    vec3 &p1 = x[0];
+    vec3 &p2 = x[1];
+    vec3 &v1 = v[0];
+    vec3 &v2 = v[1];
+
     vec3 k1 = compute_acceleration(p1, p2);
 
     vec3 v1_2 = v1 - k1 * 0.5 * dt * m2;
@@ -127,9 +169,16 @@ void RK4::step() {
     v2 = v2 + (k1 + k2*2 + k3*2 + k4) * dt / 6 * m1;
 }
 
-LinearMultistep::LinearMultistep(int max_steps, int _back_steps) : System{"LinearMultistep", max_steps}, back_steps{_back_steps} {};
+LinearMultistep::LinearMultistep(int max_steps, int _back_steps, int bodies, int seed=0) : System{"LinearMultistep", max_steps, bodies, seed}, back_steps{_back_steps} {};
 
 void LinearMultistep::step() {
+    double &m1 = m[0];
+    double &m2 = m[1];
+    vec3 &p1 = x[0];
+    vec3 &p2 = x[1];
+    vec3 &v1 = v[0];
+    vec3 &v2 = v[1];
+
     vec3 a = compute_acceleration(p1, p2);
 
     // pos
@@ -142,5 +191,4 @@ void LinearMultistep::step() {
     // speeds
     v1 = v1 - a * dt * m2;
     v2 = v2 + a * dt * m1; 
-
 }

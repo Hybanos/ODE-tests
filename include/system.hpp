@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <chrono>
+#include <vector>
 
 #include "vec3.hpp"
 
@@ -18,14 +19,18 @@ class System {
         double dt = 0.001;
         int steps = 0;
 
-        double m1 = 2.0;
-        double m2 = 1.0;
+        std::vector<double> m;
+        std::vector<vec3> x;
+        std::vector<vec3> v;
 
-        vec3 p1 = {-1, 0, 0};       
-        vec3 p2 = { 1, 0, 0};       
+        // double m1 = 2.0;
+        // double m2 = 1.0;
 
-        vec3 v1 = {0,-0.6 / m1, 0};
-        vec3 v2 = {0, 0.6, 0};
+        // vec3 p1 = {-1, 0, 0};       
+        // vec3 p2 = { 1, 0, 0};       
+
+        // vec3 v1 = {0,-0.6 / m1, 0};
+        // vec3 v2 = {0, 0.6, 0};
 
         // kinetic and potential energies
         double K, U;
@@ -37,6 +42,6 @@ class System {
     public:
         std::string name;
 
-        System(std::string _name, int _max_t) : name{_name}, max_t{_max_t} {};
+        System(std::string _name, int _max_t, int bodies, int seed);
         void run();
 };
