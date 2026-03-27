@@ -5,13 +5,13 @@
 
 int main() {
     int steps = 3e4;
-    int bodies =  2;
-    int seed = 0;
+    int bodies = 4;
+    int seed = 40;
 
     System* systems[] = {
         new Euler(steps, bodies, seed),
-        // new EulerSwapped(steps, bodies, seed),
-        new Leapfrog(steps, bodies, seed),
+        new EulerSwapped(steps, bodies, seed),
+        // new Leapfrog(steps, bodies, seed),
         // new RK2(steps, bodies, seed, 1.0),
         // new RK2(steps, bodies, seed, 0.5),
         // new RK4(steps, bodies, seed),

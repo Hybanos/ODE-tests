@@ -12,16 +12,16 @@ System::System(std::string _name, int _max_t, int bodies = 2, int seed = 0) : na
     // generate random masses/positions/speeds
     std::srand(seed);
     for (int i = 0; i < bodies; i++) {
-        m[i] = ((double) (std::rand()) / RAND_MAX * 2 - 1) * 2;
+        m[i] = ((double) (std::rand()) / RAND_MAX) * 2 + 3;
         x[i] = vec3{
-            ((double) (std::rand()) / RAND_MAX * 2 - 1) * 2,
-            ((double) (std::rand()) / RAND_MAX * 2 - 1) * 2,
-            ((double) (std::rand()) / RAND_MAX * 2 - 1) * 2,
+            ((double) (std::rand()) / RAND_MAX * 2 - 1) * 4,
+            ((double) (std::rand()) / RAND_MAX * 2 - 1) * 4,
+            ((double) (std::rand()) / RAND_MAX * 2 - 1) * 4,
         };
         v[i] = vec3{
-            ((double) (std::rand()) / RAND_MAX * 2 - 1) * 2,
-            ((double) (std::rand()) / RAND_MAX * 2 - 1) * 2,
-            ((double) (std::rand()) / RAND_MAX * 2 - 1) * 2,
+            ((double) (std::rand()) / RAND_MAX * 2 - 1),
+            ((double) (std::rand()) / RAND_MAX * 2 - 1),
+            ((double) (std::rand()) / RAND_MAX * 2 - 1),
         };
     }
 
@@ -47,7 +47,17 @@ void System::run() {
 
     std::ofstream f;
     f.open(name + ".txt", std::ios::out);
-    f << "step;m1;p1.x;p1.y;p1.z;v1.x;v1.y;v1.z;m2;p2.x;p2.y;p2.z;v2.x;v2.y;v2.z;K;U;K+1" << std::endl;
+    f << "nbody;step;";
+    for (int i = 0; i < m.size(); i++) {
+        f << "m" << i << ";";
+        f << "x" << i << ".x;";
+        f << "x" << i << ".y;";
+        f << "x" << i << ".z;";
+        f << "v" << i << ".x;";
+        f << "v" << i << ".y;";
+        f << "v" << i << ".z;";
+    }
+    f << "K;U;K+U" << std::endl;;
 
     time_point<high_resolution_clock> t1 = high_resolution_clock::now();
 
@@ -86,10 +96,16 @@ void System::compute_energies() {
     vec3 v1 = v[0];
     vec3 v2 = v[1];
 
-    K = v1.norm() * v1.norm() * m1 / 2 +
-        v2.norm() * v2.norm() * m2 / 2;
-            
-    U = -gamma * (m1 * m2) / (p1 - p2).norm();
+    K = 0;
+    U = 0;
+    for (int i = 0; i < m.size(); i++) {
+        K += v[i].norm() * v[i].norm() * m[i] / 2;
+        for (int j = i+1; j < m.size(); j++) {
+            U += -gamma * m[i] * m[j] / (x[j] - x[i]).norm();
+        }
+    }
+
+    // U = -gamma * (m1 * m2) / (p1 - p2).norm();
 }
 
 void System::save(std::ofstream &f) {
@@ -100,13 +116,13 @@ void System::save(std::ofstream &f) {
     vec3 v1 = v[0];
     vec3 v2 = v[1];
 
-    f << steps << ";"
-      << m1 << ";" 
-      << p1.x << ";" << p1.y << ";" << p1.z << ";"
-      << v1.x << ";" << v1.y << ";" << v1.z << ";"
-      << m2 << ";" 
-      << p2.x << ";" << p2.y << ";" << p2.z << ";"
-      << v2.x << ";" << v2.y << ";" << v2.z << ";"
-      << K << ";" << U << ";" << K+U
+    f << m.size() << ";" << steps << ";";
+    for (int i = 0; i < m.size(); i++) {
+        f << m[i] << ";" 
+          << x[i].x << ";" << x[i].y << ";" << x[i].z << ";"
+          << v[i].x << ";" << v[i].y << ";" << v[i].z << ";";
+    } 
+
+    f << K << ";" << U << ";" << K+U
       << std::endl;
 }

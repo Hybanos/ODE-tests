@@ -1,7 +1,8 @@
 #include "methods.hpp"
 
 Exact::Exact(int max_steps, int bodies, int seed=0) : System("Exact", max_steps, bodies, seed) {
-    // vec3 r_1 = (p2 - p1) * m2 / (m1 + m2);
+
+    if (m.size() > 2) {exit(1);}
 
     double &m1 = m[0];
     double &m2 = m[1];
@@ -52,41 +53,35 @@ void Exact::step() {
 }
 
 void Euler::step() {
-    double &m1 = m[0];
-    double &m2 = m[1];
-    vec3 &p1 = x[0];
-    vec3 &p2 = x[1];
-    vec3 &v1 = v[0];
-    vec3 &v2 = v[1];
+    for (int i = 0; i < m.size(); i++) {
+        vec3 a_i = vec3{0, 0, 0};
+        for (int j = 0; j < m.size(); j++) {
+            if (i == j) continue;
 
-    vec3 a = compute_acceleration(p1, p2);
+            vec3 r = x[j] - x[i];
+            double r3 = r.norm() * r.norm() * r.norm(); 
+            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+        }
 
-    // pos
-    p1 = p1 + v1 * dt;
-    p2 = p2 + v2 * dt;
-
-    // speeds
-    v1 = v1 - a * dt * m2;
-    v2 = v2 + a * dt * m1; 
+        x[i] = x[i] + v[i] * dt;
+        v[i] = v[i] + a_i * dt / m[i];
+    }
 }
 
 void EulerSwapped::step() {
-    double &m1 = m[0];
-    double &m2 = m[1];
-    vec3 &p1 = x[0];
-    vec3 &p2 = x[1];
-    vec3 &v1 = v[0];
-    vec3 &v2 = v[1];
+    for (int i = 0; i < m.size(); i++) {
+        vec3 a_i = vec3{0, 0, 0};
+        for (int j = 0; j < m.size(); j++) {
+            if (i == j) continue;
 
-    vec3 a = compute_acceleration(p1, p2);
+            vec3 r = x[j] - x[i];
+            double r3 = r.norm() * r.norm() * r.norm(); 
+            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+        }
 
-    // speeds
-    v1 = v1 - a * dt * m2;
-    v2 = v2 + a * dt * m1; 
-
-    // pos
-    p1 = p1 + v1 * dt;
-    p2 = p2 + v2 * dt;
+        v[i] = v[i] + a_i * dt / m[i];
+        x[i] = x[i] + v[i] * dt;
+    }
 }
 
 void Leapfrog::step() {
