@@ -58,8 +58,7 @@ class RK4 : public System {
 class LinearMultistep : public System {
     private:
         int back_steps;
-        vec3 prev1;
-        vec3 prev2;
+        std::vector<vec3> prev;
     public:
         void step();
         LinearMultistep(int max_steps, int _back_steps, int bodies, int seed);

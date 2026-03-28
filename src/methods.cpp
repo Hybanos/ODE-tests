@@ -53,137 +53,102 @@ void Exact::step() {
 }
 
 void Euler::step() {
+    compute_accelerations(a, x);
+
     for (int i = 0; i < m.size(); i++) {
-        vec3 a_i = vec3{0, 0, 0};
-        for (int j = 0; j < m.size(); j++) {
-            if (i == j) continue;
-
-            vec3 r = x[j] - x[i];
-            double r3 = r.norm() * r.norm() * r.norm(); 
-            a_i = a_i + r * gamma * m[i] * m[j] / r3;
-        }
-
         x[i] = x[i] + v[i] * dt;
-        v[i] = v[i] + a_i * dt / m[i];
+        v[i] = v[i] + a[i] * dt / m[i];
     }
 }
 
 void EulerSwapped::step() {
+    compute_accelerations(a, x);
+
     for (int i = 0; i < m.size(); i++) {
-        vec3 a_i = vec3{0, 0, 0};
-        for (int j = 0; j < m.size(); j++) {
-            if (i == j) continue;
-
-            vec3 r = x[j] - x[i];
-            double r3 = r.norm() * r.norm() * r.norm(); 
-            a_i = a_i + r * gamma * m[i] * m[j] / r3;
-        }
-
-        v[i] = v[i] + a_i * dt / m[i];
+        v[i] = v[i] + a[i] * dt / m[i];
         x[i] = x[i] + v[i] * dt;
     }
 }
 
 void Leapfrog::step() {
-    double &m1 = m[0];
-    double &m2 = m[1];
-    vec3 &p1 = x[0];
-    vec3 &p2 = x[1];
-    vec3 &v1 = v[0];
-    vec3 &v2 = v[1];
+    compute_accelerations(a, x);
+    for (int i = 0; i < m.size(); i++) {
+        x[i] = x[i] + v[i] * dt + a[i] * 0.5 * dt * dt;
+    }
 
-    vec3 a = compute_acceleration(p1, p2);
-
-    p1 = p1 + v1 * dt + a * 0.5 * dt * dt * m2;
-    p2 = p2 + v2 * dt - a * 0.5 * dt * dt * m1;
-
-    vec3 ap1 = compute_acceleration(p1, p2);
-
-    v1 = v1 - (a + ap1) * 0.5 * dt * m2;
-    v2 = v2 + (a + ap1) * 0.5 * dt * m1;
+    std::vector<vec3> ap1(m.size());
+    compute_accelerations(ap1, x);
+    for (int i = 0; i < m.size(); i++) {
+        v[i] = v[i] + (a[i] + ap1[i]) * 0.5 * dt / m[i];
+    }
 }
 
 void RK2::step() {
-    double &m1 = m[0];
-    double &m2 = m[1];
-    vec3 &p1 = x[0];
-    vec3 &p2 = x[1];
-    vec3 &v1 = v[0];
-    vec3 &v2 = v[1];
+    std::vector<vec3> a_star(m.size());
+    compute_accelerations(a_star, x);
+    for (int i = 0; i < m.size(); i++) {
+        vec3 v_star = v[i] + a_star[i] * dt * theta / m[i];
+        vec3 x_star = x[i] + v_star * dt * theta;
+    }
 
-    // first step
-    vec3 a_star = compute_acceleration(p1, p2);
+    compute_accelerations(a, x);
 
-    vec3 v1_star = v1 - a_star * dt * theta * m2;
-    vec3 v2_star = v2 + a_star * dt * theta * m1; 
-
-    vec3 p1_star = p1 + v1_star * dt * theta;
-    vec3 p2_star = p2 + v2_star * dt * theta;
-
-    // second step
-    vec3 a = compute_acceleration(p1_star, p2_star);
-
-    p1 = p1 + v1_star * (1 - 1 / (2 * theta)) * dt + v1 * 1 / (2 * theta) * dt;
-    p2 = p2 + v2_star * (1 - 1 / (2 * theta)) * dt + v2 * 1 / (2 * theta) * dt;
-
-    v1 = v1 - a * dt * m2;
-    v2 = v2 + a * dt * m1; 
+    for (int i = 0; i < m.size(); i++) {
+        x[i] = x[i] + v[i] * (1 - 1 / (2 * theta)) * dt + v[i] * 1 / (2 * theta) * dt;
+        v[i] = v[i] + a[i] * dt / m[i];
+    }
 }
 
 void RK4::step() {
-    double &m1 = m[0];
-    double &m2 = m[1];
-    vec3 &p1 = x[0];
-    vec3 &p2 = x[1];
-    vec3 &v1 = v[0];
-    vec3 &v2 = v[1];
+    std::vector<vec3> k1(m.size());
+    std::vector<vec3> k2(m.size());
+    std::vector<vec3> k3(m.size());
+    std::vector<vec3> k4(m.size());
 
-    vec3 k1 = compute_acceleration(p1, p2);
+    std::vector<vec3> tmp(m.size());
 
-    vec3 v1_2 = v1 - k1 * 0.5 * dt * m2;
-    vec3 v2_2 = v2 + k1 * 0.5 * dt * m1;
-    vec3 p1_2 = p1 + v1_2 * dt;
-    vec3 p2_2 = p2 + v2_2 * dt;
-    vec3 k2 = compute_acceleration(p1_2, p2_2);
+    compute_accelerations(k1, x);
+    for (int i = 0; i < m.size(); i++) {
+        vec3 v1 = v[i] + k1[i] * 0.5 * dt / m[i];
+        tmp[i] = x[i]  + v1 * dt;
+    }
 
-    vec3 v1_3 = v1 - k2 * 0.5 * dt * m2;
-    vec3 v2_3 = v2 + k2 * 0.5 * dt * m1;
-    vec3 p1_3 = p1 + v1_3 * dt;
-    vec3 p2_3 = p2 + v2_3 * dt;
-    vec3 k3 = compute_acceleration(p1_3, p2_3);
+    compute_accelerations(k2, tmp);
+    for (int i = 0; i < m.size(); i++) {
+        vec3 v2 = v[i] + k2[i] * 0.5 * dt / m[i];
+        tmp[i] = x[i]  + v2 * dt;
+    }
 
-    vec3 v1_4 = v1 - k3 * dt * m2;
-    vec3 v2_4 = v2 + k3 * dt * m1;
-    vec3 p1_4 = p1 + v1_4 * dt;
-    vec3 p2_4 = p2 + v2_4 * dt;
-    vec3 k4 = compute_acceleration(p1_4, p2_4);
+    compute_accelerations(k3, tmp);
+    for (int i = 0; i < m.size(); i++) {
+        vec3 v3 = v[i] + k3[i] * dt / m[i];
+        tmp[i] = x[i]  + v3 * dt;
+    }
 
-    p1 = p1 + v1 * dt;
-    p2 = p2 + v2 * dt;
-    v1 = v1 - (k1 + k2*2 + k3*2 + k4) * dt / 6 * m2;
-    v2 = v2 + (k1 + k2*2 + k3*2 + k4) * dt / 6 * m1;
+    compute_accelerations(k4, tmp);
+
+    for (int i = 0; i < m.size(); i++) {
+        x[i] = x[i] + v[i] * dt;
+        v[i] = v[i] + (k1[i] + k2[i]*2 + k3[i]*3 + k4[i]) * dt / 6 / m[i];
+    }
+    
 }
 
-LinearMultistep::LinearMultistep(int max_steps, int _back_steps, int bodies, int seed=0) : System{"LinearMultistep", max_steps, bodies, seed}, back_steps{_back_steps} {};
+LinearMultistep::LinearMultistep(int max_steps, int _back_steps, int bodies, int seed=0) : System{"LinearMultistep", max_steps, bodies, seed}, back_steps{_back_steps} {
+    prev.resize(m.size());
+
+    for (int i = 0; i < m.size(); i++) {
+        prev[i] = v[i];
+    }
+
+}
 
 void LinearMultistep::step() {
-    double &m1 = m[0];
-    double &m2 = m[1];
-    vec3 &p1 = x[0];
-    vec3 &p2 = x[1];
-    vec3 &v1 = v[0];
-    vec3 &v2 = v[1];
+    compute_accelerations(a, x);
 
-    vec3 a = compute_acceleration(p1, p2);
-
-    // pos
-    p1 = p1 + (v1 * 1.5 - prev1 * 0.5) * dt;
-    p2 = p2 + (v2 * 1.5 - prev2 * 0.5) * dt;
-
-    prev1 = v1;
-    prev2 = v2;
-
-    // speeds
-    v1 = v1 - a * dt * m2;
-    v2 = v2 + a * dt * m1; 
+    for (int i = 0; i < m.size() ;i++) {
+        x[i] = x[i] + (v[i] * 1.5 - prev[i] * 0.5) * dt;
+        prev[i] = v[i];
+        v[i] = v[i] + a[i] * dt / m[i];
+    }
 }

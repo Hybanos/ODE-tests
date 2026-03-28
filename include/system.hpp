@@ -23,19 +23,14 @@ class System {
         std::vector<vec3> x;
         std::vector<vec3> v;
 
-        // double m1 = 2.0;
-        // double m2 = 1.0;
-
-        // vec3 p1 = {-1, 0, 0};       
-        // vec3 p2 = { 1, 0, 0};       
-
-        // vec3 v1 = {0,-0.6 / m1, 0};
-        // vec3 v2 = {0, 0.6, 0};
+        // acceleration buffer
+        std::vector<vec3> a;
 
         // kinetic and potential energies
         double K, U;
 
         vec3 compute_acceleration(vec3 x1, vec3 x2);
+        void compute_accelerations(std::vector<vec3> &a, std::vector<vec3> &x);
         void compute_energies();
         virtual void step() = 0;
         void save(std::ofstream &f);

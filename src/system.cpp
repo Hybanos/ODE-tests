@@ -8,6 +8,7 @@ System::System(std::string _name, int _max_t, int bodies = 2, int seed = 0) : na
     m.resize(bodies);
     x.resize(bodies);
     v.resize(bodies);
+    a.resize(bodies);
 
     // generate random masses/positions/speeds
     std::srand(seed);
@@ -86,6 +87,20 @@ vec3 System::compute_acceleration(vec3 x1, vec3 x2) {
     vec3 dv = - r * gamma / (dist_squared * dist);
 
     return dv;
+}
+
+void System::compute_accelerations(std::vector<vec3> &a, std::vector<vec3> &x) {
+    for (int i = 0; i < m.size(); i++) {
+        vec3 a_i = vec3{0, 0, 0};
+        for (int j = 0; j < m.size(); j++) {
+            if (i == j) continue;
+
+            vec3 r = x[j] - x[i];
+            double r3 = r.norm() * r.norm() * r.norm(); 
+            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+        }
+        a[i] = a_i;
+    }
 }
 
 void System::compute_energies() {
