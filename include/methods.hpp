@@ -11,10 +11,15 @@ class Exact : public System {
         vec3 barycenter_pos; 
         vec3 barycenter_speed; 
 
+        // orbit plane 
+        vec3 x_hat;
+        vec3 y_hat;
+        vec3 z_hat;
+
         double semi_major_axis;
         double eccentricity;
         double E_0;
-        double mean_movement;
+        double mean_motion;
 
         vec3 compute_barycenter(double t);
         vec3 compute_pos(double t);

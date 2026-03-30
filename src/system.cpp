@@ -92,11 +92,18 @@ vec3 System::compute_acceleration(vec3 x1, vec3 x2) {
 void System::compute_accelerations(std::vector<vec3> &a, std::vector<vec3> &x) {
     for (int i = 0; i < m.size(); i++) {
         vec3 a_i = vec3{0, 0, 0};
-        for (int j = 0; j < m.size(); j++) {
-            if (i == j) continue;
 
+        for (int j = 0; j < i; j++) {
             vec3 r = x[j] - x[i];
-            double r3 = r.norm() * r.norm() * r.norm(); 
+            double r_norm = r.norm();
+            double r3 = r_norm * r_norm * r_norm; 
+            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+        }
+
+        for (int j = i+1; j < m.size(); j++) {
+            vec3 r = x[j] - x[i];
+            double r_norm = r.norm();
+            double r3 = r_norm * r_norm * r_norm; 
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
         a[i] = a_i;

@@ -6,40 +6,43 @@ Exact::Exact(int max_steps, int bodies, int seed=0) : System("Exact", max_steps,
 
     double &m1 = m[0];
     double &m2 = m[1];
-    vec3 &p1 = x[0];
-    vec3 &p2 = x[1];
+    vec3 &x1 = x[0];
+    vec3 &x2 = x[1];
     vec3 &v1 = v[0];
     vec3 &v2 = v[1];
 
-    barycenter_pos = (p1 * m1 + p2 * m2) / (m1 + m2);
+    barycenter_pos = (x1 * m1 + x2 * m2) / (m1 + m2);
     barycenter_speed = (v1 * m1 + v2 * m2) / (m1 + m2);
 
-    vec3 r = p1 - p2;
+    vec3 r = x1 - x2;
     vec3 v = v1 - v2;
     vec3 h = r.prod(v);
-    double mu = m1 * m2 / (m1 + m2);
+
+    z_hat = h / h.norm();
 
     double eps = (v.norm() * v.norm()) / 2 - gamma * (m1 + m2) / r.norm();
+    std::cout << "epsilon: " << eps << std::endl;
 
-    semi_major_axis = - gamma * (m1 + m2) / 2 * eps;
-    vec3 vec_eccentricity = v.prod(h) / gamma * (m1 + m2) - r / r.norm();
+    semi_major_axis = - gamma * (m1 + m2) / (2 * eps);
+    std::cout << "semi major axis: " << semi_major_axis << std::endl;
+
+    vec3 vec_eccentricity = v.prod(h) / (gamma * (m1 + m2)) - r / r.norm();
     eccentricity = vec_eccentricity.norm();
+    std::cout << "eccentricity: " << eccentricity << std::endl;
+    x_hat = vec_eccentricity / vec_eccentricity.norm();
+    y_hat = z_hat.prod(x_hat);
 
     double cos_nu = vec_eccentricity.dot(r) / (eccentricity * r.norm());
     double nu = std::acos(cos_nu);
-
     if (r.dot(v) < 0) nu = 2*3.141592 - nu;
+    std::cout << "initial true anomaly: " << nu << std::endl;
 
-    double tan_E_0_2 = std::sqrt((1 - eccentricity) / (1 + eccentricity)) * std::tan(nu / 2);
-    E_0 = std::atan(tan_E_0_2) * 2;
-
-    mean_movement = std::sqrt(gamma * (m1 + m2) / semi_major_axis * semi_major_axis * semi_major_axis);
-
-    std::cout << semi_major_axis << std::endl;
+    mean_motion = std::sqrt(gamma * (m1 + m2) / (semi_major_axis * semi_major_axis * semi_major_axis));
+    std::cout << "mean motion: " << mean_motion << std::endl;
 }
 
 vec3 Exact::compute_pos(double t) {
-    double M = mean_movement * t;
+    double M = mean_motion * t;
     
     return vec3{};
 }
@@ -49,7 +52,23 @@ vec3 Exact::compute_barycenter(double t) {
 }
 
 void Exact::step() {
+    double &m1 = m[0];
+    double &m2 = m[1];
+    vec3 &x1 = x[0];
+    vec3 &x2 = x[1];
+    vec3 &v1 = v[0];
+    vec3 &v2 = v[1];
 
+    // double r_t = semi_major_axis * ( 1 - eccentricity * std::cos(mean_motion * t));
+    // std::cout << r_t << std::endl;
+
+    vec3 rr = vec3{0, 0, 0};
+
+    rr.x = semi_major_axis * (cos(mean_motion * t) - eccentricity);
+    rr.y = semi_major_axis * std::sqrt(1 - eccentricity * eccentricity) * std::sin(mean_motion * t);
+
+    x1 = barycenter_pos + rr * m2 / (m1 * m2);
+    x2 = barycenter_pos - rr * m1 / (m1 * m2);
 }
 
 void Euler::step() {
@@ -105,6 +124,7 @@ void RK4::step() {
     std::vector<vec3> k3(m.size());
     std::vector<vec3> k4(m.size());
 
+    // tmp position vector
     std::vector<vec3> tmp(m.size());
 
     compute_accelerations(k1, x);
