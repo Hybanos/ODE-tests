@@ -8,7 +8,7 @@ Currently implmented:
  - RK2
  - RK4
 
-<!-- ![haha](.github/media/4-body-cmp.mp4) -->
+https://github.com/user-attachments/assets/c05d0783-b1b9-4470-976a-01f7c282c02a
 
 ## Build
 
