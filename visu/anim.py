@@ -57,7 +57,7 @@ class Haha(ThreeDScene):
 
         # nah wtf python
         for i in range(len(dots)):
-            exec(f"dots[{i}].add_updater(lambda x: x.move_to(paths[{i}].get_end()))", globals=locals(), locals=globals())
+            exec(f"dots[{i}].add_updater(lambda x: x.move_to(paths[{i}].get_end()))", locals(), globals())
 
         self.add_fixed_in_frame_mobjects(*legends)
         self.add_fixed_in_frame_mobjects(*texts)
@@ -65,5 +65,5 @@ class Haha(ThreeDScene):
         self.begin_ambient_camera_rotation(rate=0.5)
     #    self.begin_3dillusion_camera_rotation(rate=2)
         self.play(
-            *[Create(path, run_time=5, rate_func=linear) for path in paths],
+            *[Create(path, run_time=20, rate_func=linear) for path in paths],
         )
