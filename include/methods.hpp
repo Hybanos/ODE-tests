@@ -11,18 +11,17 @@ class Exact : public System {
         vec3 barycenter_pos; 
         vec3 barycenter_speed; 
 
-        // orbit plane 
-        vec3 x_hat;
-        vec3 y_hat;
-        vec3 z_hat;
+        vec3 h;
 
+        vec3 vec_eccentricity;
+
+        double nu;
         double semi_major_axis;
         double eccentricity;
         double E_0;
         double mean_motion;
 
-        vec3 compute_barycenter(double t);
-        vec3 compute_pos(double t);
+        double solve_true_anomaly();
     public:
         void step();
         Exact(int max_steps, int bodies, int seed);

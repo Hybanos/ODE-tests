@@ -16,9 +16,7 @@ Exact::Exact(int max_steps, int bodies, int seed=0) : System("Exact", max_steps,
 
     vec3 r = x1 - x2;
     vec3 v = v1 - v2;
-    vec3 h = r.prod(v);
-
-    z_hat = h / h.norm();
+    h = r.prod(v);
 
     double eps = (v.norm() * v.norm()) / 2 - gamma * (m1 + m2) / r.norm();
     std::cout << "epsilon: " << eps << std::endl;
@@ -26,29 +24,53 @@ Exact::Exact(int max_steps, int bodies, int seed=0) : System("Exact", max_steps,
     semi_major_axis = - gamma * (m1 + m2) / (2 * eps);
     std::cout << "semi major axis: " << semi_major_axis << std::endl;
 
-    vec3 vec_eccentricity = v.prod(h) / (gamma * (m1 + m2)) - r / r.norm();
+    vec_eccentricity = v.prod(h) / (gamma * (m1 + m2)) - r / r.norm();
     eccentricity = vec_eccentricity.norm();
     std::cout << "eccentricity: " << eccentricity << std::endl;
-    x_hat = vec_eccentricity / vec_eccentricity.norm();
-    y_hat = z_hat.prod(x_hat);
 
     double cos_nu = vec_eccentricity.dot(r) / (eccentricity * r.norm());
-    double nu = std::acos(cos_nu);
-    if (r.dot(v) < 0) nu = 2*3.141592 - nu;
+    nu = std::acos(cos_nu);
+    if (r.dot(v) < 0) nu = 2*M_PI - nu;
     std::cout << "initial true anomaly: " << nu << std::endl;
 
     mean_motion = std::sqrt(gamma * (m1 + m2) / (semi_major_axis * semi_major_axis * semi_major_axis));
     std::cout << "mean motion: " << mean_motion << std::endl;
 }
 
-vec3 Exact::compute_pos(double t) {
-    double M = mean_motion * t;
-    
-    return vec3{};
-}
+double Exact::solve_true_anomaly() {
+    double e = 1e-9;
+    int max = 10000;
 
-vec3 Exact::compute_barycenter(double t) {
-    return barycenter_pos + barycenter_speed * t;
+    // double tan_E_2 = std::sqrt((1 - eccentricity) / (1 + eccentricity)) * std::tan(nu / 2);
+    // double E_0 = std::atan(tan_E_2 / 2);
+    
+    // // double E_0 = 2 * std::atan2(std::sqrt(1 - eccentricity) * std::sin(nu / 2), std::sqrt(1 + eccentricity) * std::cos(nu / 2));
+    // double M_0 = E_0 - eccentricity * std::sin(E_0);
+
+    // std::cout << E_0 << " " << M_0 << std::endl;
+
+    // double M_0 = nu - 2 * eccentricity * sin(nu) +
+    //              (0.75 * eccentricity * eccentricity + 1 / 8 * eccentricity * eccentricity * eccentricity * eccentricity) * sin(2 * nu) -
+    //              1 / 3 * eccentricity * eccentricity * eccentricity * sin(3 * nu) +
+    //              5 / 32 * eccentricity * eccentricity * eccentricity * eccentricity * sin(4 * nu);
+
+    double tmp_mean_anomaly = mean_motion * t;
+    double anm_ecc = eccentricity < 0.8 ? tmp_mean_anomaly : M_PI;
+    double f = anm_ecc - eccentricity * std::sin(anm_ecc) - tmp_mean_anomaly;
+    int ite = 0;
+
+    while (std::abs(f) > e) {
+        f = anm_ecc - eccentricity * sin(anm_ecc) - tmp_mean_anomaly;
+        anm_ecc = anm_ecc - f / (1.0 - eccentricity * std::cos(anm_ecc));
+
+        ite += 1;
+        if (ite > max) {
+            std::cout << "failed to converge" << std::endl;
+            break;
+        }
+    }
+
+    return std::fmod(anm_ecc + M_PI * 2, M_PI * 2);
 }
 
 void Exact::step() {
@@ -59,16 +81,18 @@ void Exact::step() {
     vec3 &v1 = v[0];
     vec3 &v2 = v[1];
 
-    // double r_t = semi_major_axis * ( 1 - eccentricity * std::cos(mean_motion * t));
-    // std::cout << r_t << std::endl;
+    double true_anomaly = solve_true_anomaly();
 
-    vec3 rr = vec3{0, 0, 0};
+    double x = semi_major_axis * (cos(true_anomaly) - eccentricity);
+    double y = semi_major_axis * std::sqrt(1 - eccentricity * eccentricity) * std::sin(true_anomaly);
 
-    rr.x = semi_major_axis * (cos(mean_motion * t) - eccentricity);
-    rr.y = semi_major_axis * std::sqrt(1 - eccentricity * eccentricity) * std::sin(mean_motion * t);
+    vec3 p_hat = vec_eccentricity / eccentricity;
+    vec3 q_hat = (h /h.norm()).prod(p_hat);
 
-    x1 = barycenter_pos + rr * m2 / (m1 * m2);
-    x2 = barycenter_pos - rr * m1 / (m1 * m2);
+    x1 = p_hat * x + q_hat * y;
+    x1 = x1 * m2 / (m1 + m2);
+    x2 = p_hat * x + q_hat * y;
+    x2 = x2 * -m1 / (m1 + m2);
 }
 
 void Euler::step() {

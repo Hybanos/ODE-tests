@@ -65,5 +65,5 @@ class Haha(ThreeDScene):
         self.begin_ambient_camera_rotation(rate=0.5)
     #    self.begin_3dillusion_camera_rotation(rate=2)
         self.play(
-            *[Create(path, run_time=20, rate_func=linear) for path in paths],
+            *[Create(path, run_time=5, rate_func=linear) for path in paths],
         )
