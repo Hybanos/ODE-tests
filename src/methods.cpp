@@ -246,6 +246,9 @@ void RK45::step() {
         x[i] = x[i] + v[i] * h;
         v[i] = v[i] + (k1[i] * ch[0] + k2[i] * ch[1] + k3[i] * ch[2] + k4[i] * ch[3] + k5[i] * ch[4] + k6[i] * ch[5]) * h / m[i];
     }
+
+    // TMP ??
+    if (h > dt * 1) h = dt * 1;
 }
 
 LinearMultistep::LinearMultistep(int max_steps, int _back_steps, int bodies, int seed=0) : System{"LinearMultistep", max_steps, bodies, seed}, back_steps{_back_steps} {
