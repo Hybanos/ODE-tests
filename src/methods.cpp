@@ -175,7 +175,77 @@ void RK4::step() {
         x[i] = x[i] + v[i] * dt;
         v[i] = v[i] + (k1[i] + k2[i]*2 + k3[i]*3 + k4[i]) * dt / 6 / m[i];
     }
-    
+}
+
+void RK45::step() {
+    std::vector<vec3> k1(m.size());
+    std::vector<vec3> k2(m.size());
+    std::vector<vec3> k3(m.size());
+    std::vector<vec3> k4(m.size());
+    std::vector<vec3> k5(m.size());
+    std::vector<vec3> k6(m.size());
+
+    std::vector<vec3> v1(m.size());
+    std::vector<vec3> v2(m.size());
+    std::vector<vec3> v3(m.size());
+    std::vector<vec3> v4(m.size());
+    std::vector<vec3> v5(m.size());
+    std::vector<vec3> v6(m.size());
+
+    // tmp position vector
+    std::vector<vec3> tmp(m.size());
+
+    std::vector<vec3> e(m.size());
+
+    double sum_e;
+
+    do {
+        compute_accelerations(k1, x);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 v1 = v[i] + k1[i] * h * B[1][0] / m[i];
+            tmp[i] = x[i] + v1 * h;
+        }
+
+        compute_accelerations(k2, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 v2 = v[i] + (k1[i] * B[2][0] + k2[i] * B[2][1]) * h / m[i];
+            tmp[i] = x[i] + v2 * h;
+        }
+
+        compute_accelerations(k3, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 v3 = v[i] + (k1[i] * B[3][0] + k2[i] * B[3][1] + k3[i] * B[3][2]) * h / m[i];
+            tmp[i] = x[i] + v3 * h;
+        }
+
+        compute_accelerations(k4, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 v4 = v[i] + (k1[i] * B[4][0] + k2[i] * B[4][1] + k3[i] * B[4][2] + k4[i] * B[4][3]) * h / m[i];
+            tmp[i] = x[i] + v4 * h;
+        }
+
+        compute_accelerations(k5, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 v5 = v[i] + (k1[i] * B[5][0] + k2[i] * B[5][1] + k3[i] * B[5][2] + k4[i] * B[5][3] + k5[i] * B[5][4]) * h / m[i];
+            tmp[i] = x[i] + v5 * h;
+        }
+
+        compute_accelerations(k6, tmp);
+
+        sum_e = 0;
+        for (int i = 0; i < m.size(); i++) {
+            e[i] = k1[i] * (ch[0] - c[0]) + k2[i] * (ch[1] - c[1]) + k3[i] * (ch[2] - c[2]) + k4[i] * (ch[3] - c[3]) + k5[i] * (ch[4] - c[4]) + k6[i] * (ch[5] - c[5]);
+            // physics ?
+            sum_e += e[i].norm();
+        }
+
+        h = 0.9 * h * std::pow(eps / sum_e, 1.0/5.0);
+    } while (sum_e > eps);
+
+    for (int i = 0; i < m.size(); i++) {
+        x[i] = x[i] + v[i] * h;
+        v[i] = v[i] + (k1[i] * ch[0] + k2[i] * ch[1] + k3[i] * ch[2] + k4[i] * ch[3] + k5[i] * ch[4] + k6[i] * ch[5]) * h / m[i];
+    }
 }
 
 LinearMultistep::LinearMultistep(int max_steps, int _back_steps, int bodies, int seed=0) : System{"LinearMultistep", max_steps, bodies, seed}, back_steps{_back_steps} {

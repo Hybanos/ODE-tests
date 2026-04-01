@@ -18,4 +18,4 @@ if [ ! -d ./venv ]; then
      venv/bin/pip install manim matplotlib
 fi
 
-venv/bin/manim -p anim.py || exit
+venv/bin/manim -qm -p anim.py || exit

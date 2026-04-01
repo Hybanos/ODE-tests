@@ -59,6 +59,26 @@ class RK4 : public System {
         RK4(int max_steps, int bodies, int seed=0) : System{"RK4", max_steps, bodies, seed} {}
 };
 
+class RK45 : public System {
+    private:
+        double h;
+        double eps = 1e-3;
+        double A[6] = {2.0/9.0, 1.0/3.0, 3.0/4.0, 1, 5.0/6.0};
+        double B[6][5] = {
+            {0,           0,           0,           0,         0},
+            {2.0/9.0,     0,           0,           0,         0},
+            {1.0/12.0,    1.0/4.0,     0,           0,         0},
+            {69.0/128.0, -243.0/128.0, 135.0/64.0,  0,         0},
+            {-17.0/12.0,  27.0/4.0,   -27.0/5.0,    16.0/15.0, 0},
+            {65.0/432.0, -5.0/16.0,    13.0/16.0,   4.0/27.0,  5.0/144.0}
+        };
+        double c[6] = {1.0/9.0, 0, 9.0/20.0, 16.0/45.0, 1.0/12.0};
+        double ch[6] = {47.0/450.0, 0, 12.0/25.0, 32.0/225.0, 1.0/30.0, 6.0/25.0};
+    public:
+        void step();
+        RK45(int max_steps, int bodies, int seed=0) : System{"RK45", max_steps, bodies, seed} {h = dt;}
+};
+
 class LinearMultistep : public System {
     private:
         int back_steps;
