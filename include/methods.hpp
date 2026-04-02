@@ -79,6 +79,15 @@ class RK45 : public System {
         RK45(int max_steps, int bodies, int seed=0) : System{"RK45", max_steps, bodies, seed} {h = dt;}
 };
 
+class DOP853 : public System {
+    private:
+        double h;
+        double eps = 1e-3;
+    public:
+        void step();
+        DOP853(int max_steps, int bodies, int seed=0) : System{"DOP853", max_steps, bodies, seed} {h = dt;}
+};
+
 class LinearMultistep : public System {
     private:
         int back_steps;

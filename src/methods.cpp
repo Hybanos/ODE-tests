@@ -251,6 +251,8 @@ void RK45::step() {
     if (h > dt * 1) h = dt * 1;
 }
 
+void DOP853::step() {}
+
 LinearMultistep::LinearMultistep(int max_steps, int _back_steps, int bodies, int seed=0) : System{"LinearMultistep", max_steps, bodies, seed}, back_steps{_back_steps} {
     prev.resize(m.size());
 
