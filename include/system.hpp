@@ -11,12 +11,11 @@
 
 class System {
     protected:
-        int max_t;
-
         double gamma = 1;
 
         double t = 0.0;
         double dt = 0.001;
+        double target_t;
         int steps = 0;
 
         std::vector<double> m;
@@ -37,6 +36,6 @@ class System {
     public:
         std::string name;
 
-        System(std::string _name, int _max_t, int bodies, int seed);
+        System(std::string _name, double _target_t, int bodies, int seed);
         void run();
 };

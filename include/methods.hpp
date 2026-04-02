@@ -24,25 +24,25 @@ class Exact : public System {
         double solve_true_anomaly();
     public:
         void step();
-        Exact(int max_steps, int bodies, int seed);
+        Exact(double target_t, int bodies, int seed);
 };
 
 class Euler : public System {
     public:
         void step();
-        Euler(int max_steps, int bodies, int seed=0) : System{"Euler", max_steps, bodies, seed} {}
+        Euler(double target_t, int bodies, int seed=0) : System{"Euler", target_t, bodies, seed} {}
 };
 
 class EulerSwapped : public System {
     public:
         void step();
-        EulerSwapped(int max_steps, int bodies, int seed=0) : System{"EulerSwapped", max_steps, bodies, seed} {}
+        EulerSwapped(double target_t, int bodies, int seed=0) : System{"EulerSwapped", target_t, bodies, seed} {}
 };
 
 class Leapfrog : public System {
     public:
         void step();
-        Leapfrog(int max_steps, int bodies, int seed=0) : System{"Leapfrog", max_steps, bodies, seed} {}
+        Leapfrog(double target_t, int bodies, int seed=0) : System{"Leapfrog", target_t, bodies, seed} {}
 };
 
 class RK2 : public System {
@@ -50,18 +50,18 @@ class RK2 : public System {
         double theta;
     public:
         void step();
-        RK2(int max_steps, int bodies, int seed=0, double _theta=1) : System{std::string("RK2") + std::to_string((int) (1 / _theta)), max_steps, bodies, seed}, theta{_theta} {}
+        RK2(double target_t, int bodies, int seed=0, double _theta=1) : System{std::string("RK2") + std::to_string((int) (1 / _theta)), target_t, bodies, seed}, theta{_theta} {}
 };
 
 class RK4 : public System {
     public:
         void step();
-        RK4(int max_steps, int bodies, int seed=0) : System{"RK4", max_steps, bodies, seed} {}
+        RK4(double target_t, int bodies, int seed=0) : System{"RK4", target_t, bodies, seed} {}
 };
 
 class RK45 : public System {
     private:
-        double h;
+        double base_dt; 
         double eps = 1e-3;
         double A[6] = {2.0/9.0, 1.0/3.0, 3.0/4.0, 1, 5.0/6.0};
         double B[6][5] = {
@@ -76,7 +76,7 @@ class RK45 : public System {
         double ch[6] = {47.0/450.0, 0, 12.0/25.0, 32.0/225.0, 1.0/30.0, 6.0/25.0};
     public:
         void step();
-        RK45(int max_steps, int bodies, int seed=0) : System{"RK45", max_steps, bodies, seed} {h = dt;}
+        RK45(double target_t, int bodies, int seed=0) : System{"RK45", target_t, bodies, seed} {base_dt = dt;}
 };
 
 class DOP853 : public System {
@@ -85,7 +85,7 @@ class DOP853 : public System {
         double eps = 1e-3;
     public:
         void step();
-        DOP853(int max_steps, int bodies, int seed=0) : System{"DOP853", max_steps, bodies, seed} {h = dt;}
+        DOP853(double target_t, int bodies, int seed=0) : System{"DOP853", target_t, bodies, seed} {h = dt;}
 };
 
 class LinearMultistep : public System {
@@ -94,5 +94,5 @@ class LinearMultistep : public System {
         std::vector<vec3> prev;
     public:
         void step();
-        LinearMultistep(int max_steps, int _back_steps, int bodies, int seed);
+        LinearMultistep(double target_t, int _back_steps, int bodies, int seed);
 };

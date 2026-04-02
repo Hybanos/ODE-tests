@@ -4,7 +4,7 @@ using std::chrono::high_resolution_clock;
 using std::chrono::time_point;
 
 
-System::System(std::string _name, int _max_t, int bodies = 2, int seed = 0) : name{_name}, max_t{_max_t} {
+System::System(std::string _name, double _target_t, int bodies = 2, int seed = 0) : name{_name}, target_t{_target_t} {
     m.resize(bodies);
     x.resize(bodies);
     v.resize(bodies);
@@ -48,7 +48,7 @@ void System::run() {
 
     std::ofstream f;
     f.open(name + ".txt", std::ios::out);
-    f << "nbody;step;";
+    f << "nbody;step;t;";
     for (int i = 0; i < m.size(); i++) {
         f << "m" << i << ";";
         f << "x" << i << ".x;";
@@ -64,7 +64,7 @@ void System::run() {
 
     compute_energies();
     save(f);
-    while (steps < max_t) {
+    while (t < target_t) {
         t += dt;
         steps += 1;
         step();
@@ -138,7 +138,7 @@ void System::save(std::ofstream &f) {
     vec3 v1 = v[0];
     vec3 v2 = v[1];
 
-    f << m.size() << ";" << steps << ";";
+    f << m.size() << ";" << steps << ";" << t << ";";
     for (int i = 0; i < m.size(); i++) {
         f << m[i] << ";" 
           << x[i].x << ";" << x[i].y << ";" << x[i].z << ";"

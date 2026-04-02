@@ -41,7 +41,7 @@ class Haha(ThreeDScene):
             data = np.loadtxt(f"../{f}.txt", delimiter=";", skiprows=1).T
             bodies = int(data[0][0])
             steps = data[1]
-            offset = 2
+            offset = 3
             m_ratio = 5
             for j in range(bodies):
                 m = data[offset+0]

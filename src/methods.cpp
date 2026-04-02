@@ -1,6 +1,6 @@
 #include "methods.hpp"
 
-Exact::Exact(int max_steps, int bodies, int seed=0) : System("Exact", max_steps, bodies, seed) {
+Exact::Exact(double target_t, int bodies, int seed=0) : System("Exact", target_t, bodies, seed) {
 
     if (m.size() > 2) {exit(1);}
 
@@ -202,32 +202,32 @@ void RK45::step() {
     do {
         compute_accelerations(k1, x);
         for (int i = 0; i < m.size(); i++) {
-            vec3 v1 = v[i] + k1[i] * h * B[1][0] / m[i];
-            tmp[i] = x[i] + v1 * h;
+            vec3 v1 = v[i] + k1[i] * dt * B[1][0] / m[i];
+            tmp[i] = x[i] + v1 * dt;
         }
 
         compute_accelerations(k2, tmp);
         for (int i = 0; i < m.size(); i++) {
-            vec3 v2 = v[i] + (k1[i] * B[2][0] + k2[i] * B[2][1]) * h / m[i];
-            tmp[i] = x[i] + v2 * h;
+            vec3 v2 = v[i] + (k1[i] * B[2][0] + k2[i] * B[2][1]) * dt / m[i];
+            tmp[i] = x[i] + v2 * dt;
         }
 
         compute_accelerations(k3, tmp);
         for (int i = 0; i < m.size(); i++) {
-            vec3 v3 = v[i] + (k1[i] * B[3][0] + k2[i] * B[3][1] + k3[i] * B[3][2]) * h / m[i];
-            tmp[i] = x[i] + v3 * h;
+            vec3 v3 = v[i] + (k1[i] * B[3][0] + k2[i] * B[3][1] + k3[i] * B[3][2]) * dt / m[i];
+            tmp[i] = x[i] + v3 * dt;
         }
 
         compute_accelerations(k4, tmp);
         for (int i = 0; i < m.size(); i++) {
-            vec3 v4 = v[i] + (k1[i] * B[4][0] + k2[i] * B[4][1] + k3[i] * B[4][2] + k4[i] * B[4][3]) * h / m[i];
-            tmp[i] = x[i] + v4 * h;
+            vec3 v4 = v[i] + (k1[i] * B[4][0] + k2[i] * B[4][1] + k3[i] * B[4][2] + k4[i] * B[4][3]) * dt / m[i];
+            tmp[i] = x[i] + v4 * dt;
         }
 
         compute_accelerations(k5, tmp);
         for (int i = 0; i < m.size(); i++) {
-            vec3 v5 = v[i] + (k1[i] * B[5][0] + k2[i] * B[5][1] + k3[i] * B[5][2] + k4[i] * B[5][3] + k5[i] * B[5][4]) * h / m[i];
-            tmp[i] = x[i] + v5 * h;
+            vec3 v5 = v[i] + (k1[i] * B[5][0] + k2[i] * B[5][1] + k3[i] * B[5][2] + k4[i] * B[5][3] + k5[i] * B[5][4]) * dt / m[i];
+            tmp[i] = x[i] + v5 * dt;
         }
 
         compute_accelerations(k6, tmp);
@@ -239,21 +239,21 @@ void RK45::step() {
             sum_e += e[i].norm();
         }
 
-        h = 0.9 * h * std::pow(eps / sum_e, 1.0/5.0);
+        dt = 0.9 * dt * std::pow(eps / sum_e, 1.0/5.0);
     } while (sum_e > eps);
 
     for (int i = 0; i < m.size(); i++) {
-        x[i] = x[i] + v[i] * h;
-        v[i] = v[i] + (k1[i] * ch[0] + k2[i] * ch[1] + k3[i] * ch[2] + k4[i] * ch[3] + k5[i] * ch[4] + k6[i] * ch[5]) * h / m[i];
+        x[i] = x[i] + v[i] * dt;
+        v[i] = v[i] + (k1[i] * ch[0] + k2[i] * ch[1] + k3[i] * ch[2] + k4[i] * ch[3] + k5[i] * ch[4] + k6[i] * ch[5]) * dt / m[i];
     }
 
     // TMP ??
-    if (h > dt * 1) h = dt * 1;
+    if (dt > base_dt) dt = base_dt * 1;
 }
 
 void DOP853::step() {}
 
-LinearMultistep::LinearMultistep(int max_steps, int _back_steps, int bodies, int seed=0) : System{"LinearMultistep", max_steps, bodies, seed}, back_steps{_back_steps} {
+LinearMultistep::LinearMultistep(double target_t, int _back_steps, int bodies, int seed=0) : System{"LinearMultistep", target_t, bodies, seed}, back_steps{_back_steps} {
     prev.resize(m.size());
 
     for (int i = 0; i < m.size(); i++) {
