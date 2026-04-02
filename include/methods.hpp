@@ -5,6 +5,7 @@
 
 #include "vec3.hpp"
 #include "system.hpp"
+#include "dop853coefs.hpp"
 
 class Exact : public System {
     private:
@@ -82,7 +83,12 @@ class RK45 : public System {
 class DOP853 : public System {
     private:
         double h;
-        double eps = 1e-3;
+        double a_tol = 1e-12;
+        double r_tol = 1e-12;
+
+        double beta = 0;
+
+        double facold = 1e-4;
     public:
         void step();
         DOP853(double target_t, int bodies, int seed=0) : System{"DOP853", target_t, bodies, seed} {h = dt;}

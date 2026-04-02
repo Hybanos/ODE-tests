@@ -79,16 +79,6 @@ void System::run() {
     std::cout << (t2 - t1).count() / 1e9 << "s" << std::endl;
 }
 
-vec3 System::compute_acceleration(vec3 x1, vec3 x2) {
-    double dist_squared = x1.dist_squared(x2);
-    double dist = std::sqrt(dist_squared);
-
-    vec3 r  = x2 - x1;
-    vec3 dv = - r * gamma / (dist_squared * dist);
-
-    return dv;
-}
-
 void System::compute_accelerations(std::vector<vec3> &a, std::vector<vec3> &x) {
     for (int i = 0; i < m.size(); i++) {
         vec3 a_i = vec3{0, 0, 0};
