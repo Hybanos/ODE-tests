@@ -9,8 +9,6 @@
 #include "system.hpp"
 #include "dop853coefs.hpp"
 
-namespace stdex = Kokkos;
-
 class Exact : public System {
     private:
         vec3 barycenter_pos; 
@@ -62,6 +60,40 @@ class RK4 : public System {
     public:
         void step();
         RK4(double target_t, int bodies, int seed=0) : System{"RK4", target_t, bodies, seed} {}
+};
+
+class RK4_md : public System {
+    private:
+        std::vector<vec3> _k1;
+        std::vector<vec3> _k2;
+        std::vector<vec3> _k3;
+        std::vector<vec3> _k4;
+
+        std::vector<vec3> _tmp;
+
+        array k1;
+        array k2;
+        array k3;
+        array k4;
+
+        array tmp;
+    public:
+        void step();
+        RK4_md(double target_t, int bodies, int seed=0) : System{"RK4-md", target_t, bodies, seed} {
+            _k1.resize(data.extent(0) / 3);
+            _k2.resize(data.extent(0) / 3);
+            _k3.resize(data.extent(0) / 3);
+            _k4.resize(data.extent(0) / 3);
+
+            _tmp.resize(data.extent(0) / 3);
+
+            k1 = array((double *) _k1.data(), _k1.size() * 3);
+            k2 = array((double *) _k2.data(), _k2.size() * 3);
+            k3 = array((double *) _k3.data(), _k3.size() * 3);
+            k4 = array((double *) _k4.data(), _k4.size() * 3);
+
+            tmp = array((double *) _tmp.data(), _tmp.size() * 3);
+        }
 };
 
 class RK45 : public System {

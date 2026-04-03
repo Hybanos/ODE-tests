@@ -42,6 +42,17 @@ System::System(std::string _name, double _target_t, int bodies = 2, int seed = 0
         v[i] = v[i] - barycenter_speed;
         x[i] = x[i] - barycenter_pos;
     }
+
+    // tmp mdspan experiment
+    for (int i = 0; i < bodies; i++) _data.push_back(x[i]);
+    for (int i = 0; i < bodies; i++) _data.push_back(v[i]);
+
+    data = array((double *) _data.data(), bodies * 6);
+    for (int i = 0; i < bodies * 6; i++) {
+        std::cout << data[i];
+    }
+
+    std::cout << std::endl;
 };
 
 void System::run() {
@@ -77,6 +88,36 @@ void System::run() {
     time_point<high_resolution_clock> t2 = high_resolution_clock::now();
     std::cout << name << ": ";
     std::cout << (t2 - t1).count() / 1e9 << "s" << std::endl;
+}
+
+// We might need to pass the mass of the bodies as well at some point
+void System::compute_acc_md(double t, array &X, array &ret) {
+    size_t size = X.extent(0) / 3 / 2;
+    vecarray x = vecarray((vec3 *) X.data_handle(), size);
+    vecarray v = vecarray((vec3 *) X.data_handle() + size, size);
+    vecarray ret_v = vecarray((vec3 *) ret.data_handle(), size);
+    vecarray ret_a = vecarray((vec3 *) ret.data_handle() + size, size);
+
+    for (int i = 0; i < size; i++) {
+        vec3 a_i = vec3{0, 0, 0};
+
+        for (int j = 0; j < i; j++) {
+            vec3 r = x[j] - x[i];
+            double r_norm = r.norm();
+            double r3 = r_norm * r_norm * r_norm; 
+            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+        }
+
+        for (int j = i+1; j < size; j++) {
+            vec3 r = x[j] - x[i];
+            double r_norm = r.norm();
+            double r3 = r_norm * r_norm * r_norm; 
+            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+        }
+
+        ret_a[i] = a_i / m[i];
+        ret_v[i] = v[i];
+    } 
 }
 
 void System::compute_accelerations(std::vector<vec3> &a, std::vector<vec3> &x) {

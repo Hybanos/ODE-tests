@@ -16,8 +16,9 @@ int main() {
         // new RK2(target_t, bodies, seed, 1.0),
         // new RK2(target_t, bodies, seed, 0.5),
         new RK4(target_t, bodies, seed),
+        new RK4_md(target_t, bodies, seed),
         // new RK45(target_t, bodies, seed),
-        new DOP853(target_t, bodies, seed),
+        // new DOP853(target_t, bodies, seed),
         // new LinearMultistep(target_t, 1, bodies, seed)
     };
 

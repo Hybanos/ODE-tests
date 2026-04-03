@@ -177,6 +177,35 @@ void RK4::step() {
     }
 }
 
+void RK4_md::step() {
+    compute_acc_md(t, data, k1);
+    for (int i = 0; i < data.extent(0); i++) {
+        tmp[i] = data[i] + k1[i] * 0.5 * dt;
+    }
+
+    compute_acc_md(t + dt/2, tmp, k2);
+    for (int i = 0; i < data.extent(0); i++) {
+        tmp[i] = data[i] + k2[i] * 0.5 * dt;
+    }
+
+    compute_acc_md(t + dt/2, tmp, k3);
+    for (int i = 0; i < data.extent(0); i++) {
+        tmp[i] = data[i] + k3[i] * dt;
+    }
+
+    compute_acc_md(t + dt, tmp, k4);
+
+    for (int i = 0; i < data.extent(0); i++) {
+        data[i] = data[i] + (k1[i] + k2[i]*2 + k3[i]*2 + k4[i]) * dt / 6;
+    }
+
+    for (int i = 0; i < m.size(); i++) {
+        x[i] = _data[i];
+        v[i] = _data[m.size() + i];
+    }
+}
+
+
 void RK45::step() {
     std::vector<vec3> k1(m.size());
     std::vector<vec3> k2(m.size());
