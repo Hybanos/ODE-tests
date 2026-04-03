@@ -173,7 +173,7 @@ void RK4::step() {
 
     for (int i = 0; i < m.size(); i++) {
         x[i] = x[i] + v[i] * dt;
-        v[i] = v[i] + (k1[i] + k2[i]*2 + k3[i]*3 + k4[i]) * dt / 6 / m[i];
+        v[i] = v[i] + (k1[i] + k2[i]*2 + k3[i]*2 + k4[i]) * dt / 6 / m[i];
     }
 }
 
@@ -263,116 +263,137 @@ void DOP853::step() {
 
     std::vector<vec3> e(m.size());
 
-    compute_accelerations(k1, x);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a21) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
+    // NOTE: ref impl takes an educated guess on the value of dt for step 0,
+    // we're skipping that i'm lazy
 
-    compute_accelerations(k2, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a31 + k2[i] * a32) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    compute_accelerations(k3, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a41 + k3[i] * a43) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    compute_accelerations(k4, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a51 + k3[i] * a53 + k4[i] * a54) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    compute_accelerations(k5, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a61 + k4[i] * a64 + k5[i] * a65) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    compute_accelerations(k6, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a71 + k4[i] * a74 + k5[i] * a75 + k6[i] * a76) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    compute_accelerations(k7, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a81 + k4[i] * a84 + k5[i] * a85 + k6[i] * a86 + k7[i] * a87) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    compute_accelerations(k8, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a91 + k4[i] * a94 + k5[i] * a95 + k6[i] * a96 + k7[i] * a97
-                  + k8[i] * a98) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    compute_accelerations(k9, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a101 + k4[i] * a104 + k5[i] * a105 + k6[i] * a106 
-                  + k7[i] * a107 + k8[i] * a108 + k9[i] * a109) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    compute_accelerations(k9, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a101 + k4[i] * a104 + k5[i] * a105 + k6[i] * a106 
-                  + k7[i] * a107 + k8[i] * a108 + k9[i] * a109) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    compute_accelerations(k10, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a111 + k4[i] * a114 + k5[i] * a115 + k6[i] * a116 
-                  + k7[i] * a117 + k8[i] * a118 + k9[i] * a119 + k10[i] * a1110) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    // k2 reuse !! not a bug !! 
-    compute_accelerations(k2, x);
-    for (int i = 0; i < m.size(); i++) {
-        vec3 _v = v[i] + (k1[i] * a121 + k4[i] * a124 + k5[i] * a125 + k6[i] * a126 
-                  + k7[i] * a127 + k8[i] * a128 + k9[i] * a129 + k10[i] * a1210 + k2[i] * a1211) * dt / m[i];
-        tmp[i] = x[i] + _v * dt;
-    }
-
-    // same for k3 !!1!
-    compute_accelerations(k3, tmp);
-    for (int i = 0; i < m.size(); i++) {
-        k4[i] = k1[i] * b1 + k6[i] * b6 + k7[i] * b7 + k8[i] * b8 + k9[i] * b9 + k10[i] * b10 + k2[i] * b11 + k3[i] * b12;
-        // might haved fucked up here (ref l. 651)
-        k5[i] = x[i] + (v[i] + k4[i] * dt / m[i]) * dt; 
-    } 
-
-    // error estimation
-    // idk if all those vec3.norm() are good ideas
     double err = 0;
-    double err2 = 0;
-    for (int i = 0; i < m.size(); i++) {
-        double sk = a_tol + r_tol * std::max(std::abs(v[i].norm()), std::abs(k5[i].norm()));
-        double err_i = (k4[i] - k1[i] * bhh1 - k9[i] * bhh2 - k3[i] * bhh3).norm();
-        err2 = err2 + (err_i/sk) * (err_i / sk);
-        err_i = (k1[i] * er1 + k6[i] * er6 + k7[i] * er7 + k8[i] * er8 + k9[i] * er9 + k10[i] * er10 + k2[i] * er11 + k3[i] * er12).norm();
-        err = err + (err_i / sk) * (err_i / sk);
-    }
-    double deno = err + 0.01 * err2;
-    if (deno <= 0) deno = 1;
-    // 3 * m.size() is supposed to be total number of dims
-    err = std::abs(dt) * err * std::sqrt(1 / (3 * m.size() * deno));
+    do {
+        compute_accelerations(k1, x);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a21) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
 
-    // new h
-    // missing many parameters here (ref l.681)
-    double fac11 = std::pow(err, 1.0 / 8.0 - beta * 0.2);
-    double fac = fac11 / std::pow(facold, beta);
-    fac = std::max(1.0/6.0, std::min(fac11, fac/0.9));
-    double hnew = h / fac;
-    if (err <= 1.0) {
+        compute_accelerations(k2, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a31 + k2[i] * a32) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        compute_accelerations(k3, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a41 + k3[i] * a43) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        compute_accelerations(k4, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a51 + k3[i] * a53 + k4[i] * a54) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        compute_accelerations(k5, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a61 + k4[i] * a64 + k5[i] * a65) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        compute_accelerations(k6, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a71 + k4[i] * a74 + k5[i] * a75 + k6[i] * a76) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        compute_accelerations(k7, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a81 + k4[i] * a84 + k5[i] * a85 + k6[i] * a86 + k7[i] * a87) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        compute_accelerations(k8, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a91 + k4[i] * a94 + k5[i] * a95 + k6[i] * a96 + k7[i] * a97
+                    + k8[i] * a98) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        compute_accelerations(k9, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a101 + k4[i] * a104 + k5[i] * a105 + k6[i] * a106 
+                    + k7[i] * a107 + k8[i] * a108 + k9[i] * a109) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        compute_accelerations(k10, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a111 + k4[i] * a114 + k5[i] * a115 + k6[i] * a116 
+                    + k7[i] * a117 + k8[i] * a118 + k9[i] * a119 + k10[i] * a1110) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        // k2 reuse !! not a bug !! 
+        compute_accelerations(k2, x);
+        for (int i = 0; i < m.size(); i++) {
+            vec3 _v = v[i] + (k1[i] * a121 + k4[i] * a124 + k5[i] * a125 + k6[i] * a126 
+                    + k7[i] * a127 + k8[i] * a128 + k9[i] * a129 + k10[i] * a1210 + k2[i] * a1211) * dt / m[i];
+            tmp[i] = x[i] + _v * dt;
+        }
+
+        // same for k3 !!1!
+        compute_accelerations(k3, tmp);
+        for (int i = 0; i < m.size(); i++) {
+            k4[i] = k1[i] * b1 + k6[i] * b6 + k7[i] * b7 + k8[i] * b8 + k9[i] * b9 + k10[i] * b10 + k2[i] * b11 + k3[i] * b12;
+            // might haved fucked up here (ref l. 651)
+            // k5[i] = x[i] + (v[i] + k4[i] * dt / m[i]) * dt; 
+            k5[i] = v[i] + k4[i] * dt / m[i]; 
+        } 
+
+        // error estimation
+        // idk if all those vec3.norm() are good ideas
+        err = 0;
+        double err2 = 0;
+        for (int i = 0; i < m.size(); i++) {
+            double sk = a_tol + r_tol * std::max(std::abs(v[i].x), std::abs(k5[i].x));
+            double err_i = (k4[i] - k1[i] * bhh1 - k9[i] * bhh2 - k3[i] * bhh3).x;
+            err2 = err2 + (err_i / sk) * (err_i / sk);
+            err_i = (k1[i] * er1 + k6[i] * er6 + k7[i] * er7 + k8[i] * er8 + k9[i] * er9 + k10[i] * er10 + k2[i] * er11 + k3[i] * er12).x;
+            err = err + (err_i / sk) * (err_i / sk);
+
+            sk = a_tol + r_tol * std::max(std::abs(v[i].y), std::abs(k5[i].y));
+            err_i = (k4[i] - k1[i] * bhh1 - k9[i] * bhh2 - k3[i] * bhh3).y;
+            err2 = err2 + (err_i / sk) * (err_i / sk);
+            err_i = (k1[i] * er1 + k6[i] * er6 + k7[i] * er7 + k8[i] * er8 + k9[i] * er9 + k10[i] * er10 + k2[i] * er11 + k3[i] * er12).y;
+            err = err + (err_i / sk) * (err_i / sk);
+
+            sk = a_tol + r_tol * std::max(std::abs(v[i].z), std::abs(k5[i].z));
+            err_i = (k4[i] - k1[i] * bhh1 - k9[i] * bhh2 - k3[i] * bhh3).z;
+            err2 = err2 + (err_i / sk) * (err_i / sk);
+            err_i = (k1[i] * er1 + k6[i] * er6 + k7[i] * er7 + k8[i] * er8 + k9[i] * er9 + k10[i] * er10 + k2[i] * er11 + k3[i] * er12).z;
+            err = err + (err_i / sk) * (err_i / sk);
+            std::cout << err << " " << err2 << std::endl;
+        }
+        double deno = err + 0.01 * err2;
+        if (deno <= 0) deno = 1;
+        // m.size() is supposed to be total number of dims (3 * m.size() ?)
+        err = std::abs(dt) * err * std::sqrt(1.0 / (3 * m.size() * deno));
+
+        // new dt
+        // missing many parameters here (ref l.681)
+        double fac11 = std::pow(err, 1.0 / 8.0 - beta * 0.2);
+        double fac = fac11 / std::pow(facold, beta);
+        std::cout << err << " " << fac << std::endl;
+        fac = std::max(1.0/6.0, std::min(fac11, fac/0.9));
+        dt = dt / fac;
         facold = std::max(err, 1e-4);
+        std::cout << steps << " " << dt << " " << fac << " " << std::endl;
+        // dt = 0.001;
+        // err = 0.1;
+    } while (err > 1.0);   
+
+    // we skip both stiffness detection and dense output prep
+    for (int i = 0; i < m.size(); i++) {
+        x[i] = x[i] + v[i] * dt;
+        v[i] = v[i] + k4[i] * dt / m[i];
     }
 }
 

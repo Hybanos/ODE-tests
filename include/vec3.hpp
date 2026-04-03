@@ -67,6 +67,10 @@ struct vec3 {
         return (*this * v).norm();
     }
 
+    inline double reduce() {
+        return x + y + z;
+    }
+
     void print() {
         std::cout << "vec3(" << x << "; " << y << "; " << z << ")" << std::endl;
     }
