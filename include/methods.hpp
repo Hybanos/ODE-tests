@@ -2,11 +2,14 @@
 
 #include <cmath>
 #include <vector>
-// #include <mdspan>
+
+#include <mdspan/mdspan.hpp>
 
 #include "vec3.hpp"
 #include "system.hpp"
 #include "dop853coefs.hpp"
+
+namespace stdex = Kokkos;
 
 class Exact : public System {
     private:
@@ -85,7 +88,7 @@ class DOP853 : public System {
     private:
         double base_dt;
         double a_tol = 1e-3;
-        double r_tol = 1e-3;
+        double r_tol = 1e-6;
 
         double beta = 0;
 
