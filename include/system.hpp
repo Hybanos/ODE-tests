@@ -19,10 +19,12 @@ using vecarray = stdex::mdspan<vec3, extents>;
 
 class System {
     protected:
+        int bodies;
+
         double gamma = 1;
 
         double t = 0.0;
-        double dt = 0.05;
+        double dt = 0.001;
         double target_t;
         int steps = 0;
 

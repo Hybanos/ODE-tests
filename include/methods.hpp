@@ -64,12 +64,12 @@ class RK4 : public System {
 
 class RK4_md : public System {
     private:
-        std::vector<vec3> _k1;
-        std::vector<vec3> _k2;
-        std::vector<vec3> _k3;
-        std::vector<vec3> _k4;
+        std::vector<double> _k1;
+        std::vector<double> _k2;
+        std::vector<double> _k3;
+        std::vector<double> _k4;
 
-        std::vector<vec3> _tmp;
+        std::vector<double> _tmp;
 
         array k1;
         array k2;
@@ -80,19 +80,19 @@ class RK4_md : public System {
     public:
         void step();
         RK4_md(double target_t, int bodies, int seed=0) : System{"RK4-md", target_t, bodies, seed} {
-            _k1.resize(data.extent(0) / 3);
-            _k2.resize(data.extent(0) / 3);
-            _k3.resize(data.extent(0) / 3);
-            _k4.resize(data.extent(0) / 3);
+            _k1.resize(data.extent(0));
+            _k2.resize(data.extent(0));
+            _k3.resize(data.extent(0));
+            _k4.resize(data.extent(0));
 
-            _tmp.resize(data.extent(0) / 3);
+            _tmp.resize(data.extent(0));
 
-            k1 = array((double *) _k1.data(), _k1.size() * 3);
-            k2 = array((double *) _k2.data(), _k2.size() * 3);
-            k3 = array((double *) _k3.data(), _k3.size() * 3);
-            k4 = array((double *) _k4.data(), _k4.size() * 3);
+            k1 = array(_k1.data(), _k1.size());
+            k2 = array(_k2.data(), _k2.size());
+            k3 = array(_k3.data(), _k3.size());
+            k4 = array(_k4.data(), _k4.size());
 
-            tmp = array((double *) _tmp.data(), _tmp.size() * 3);
+            tmp = array(_tmp.data(), _tmp.size());
         }
 };
 

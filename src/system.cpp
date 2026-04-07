@@ -4,7 +4,8 @@ using std::chrono::high_resolution_clock;
 using std::chrono::time_point;
 
 
-System::System(std::string _name, double _target_t, int bodies = 2, int seed = 0) : name{_name}, target_t{_target_t} {
+System::System(std::string _name, double _target_t, int _bodies = 2, int seed = 0) : name{_name}, target_t{_target_t} {
+    bodies = _bodies;
     m.resize(bodies);
     x.resize(bodies);
     v.resize(bodies);
@@ -48,11 +49,6 @@ System::System(std::string _name, double _target_t, int bodies = 2, int seed = 0
     for (int i = 0; i < bodies; i++) _data.push_back(v[i]);
 
     data = array((double *) _data.data(), bodies * 6);
-    for (int i = 0; i < bodies * 6; i++) {
-        std::cout << data[i];
-    }
-
-    std::cout << std::endl;
 };
 
 void System::run() {
