@@ -14,15 +14,16 @@ using ftype = std::function<void(double t, array& Y, array& ret)>;
 
 class ODE {
     protected:
-        double t = 0;
-        double dt = 0.001;
-        int steps = 0;
-        int nd;
         ftype f;
         array Y;
     public:
+        double t = 0;
+        double dt = 0.001;
+        int steps = 0;
+        std::string name = "ODE";
+
         virtual void step() = 0;
-        ODE(int _nd, ftype _f, array _Y0): nd{_nd}, f{_f}, Y{_Y0} {}
+        ODE(ftype _f, array &_Y0): f{_f}, Y{_Y0} {}
 };
 
 class RK4 : public ODE {
@@ -41,8 +42,11 @@ class RK4 : public ODE {
 
         array tmp;
     public:
+        std::string name = "RK4";
+
         void step();
-        RK4(int nd, ftype f, array X0) : ODE(nd, f, X0) {
+        RK4(ftype f, array &Y0) : ODE(f, Y0) {
+            int nd = Y.extent(0);
             _k1.resize(nd);
             _k2.resize(nd);
             _k3.resize(nd);

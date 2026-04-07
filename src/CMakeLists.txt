@@ -15,8 +15,7 @@ add_executable(main2)
 target_sources(main2 PRIVATE
     main2.cpp
     
-    system.cpp
-    methods.cpp
+    system2.cpp
     odes.cpp
 )
 
