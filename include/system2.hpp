@@ -26,13 +26,13 @@ struct config {
     config(int _bodies, int _seed);
 };
 
-template <typename Solver>
+template <typename Integrator>
 class System2 {
     private:
         // initial configuration
         config c;
 
-        Solver *solver = nullptr;
+        Integrator *integrator = nullptr;
 
         int bodies;
         double gamma = 1;
@@ -50,12 +50,13 @@ class System2 {
         void save(std::ofstream &f);
     public:
         void run();
+        std::string get_name() {return integrator->name;}
         System2(config &_c);
-        ~System2() {delete solver;}
+        ~System2() {delete integrator;}
 };
 
-template <typename Solver>
-System2<Solver>::System2(config &_c) : c{_c} {
+template <typename Integrator>
+System2<Integrator>::System2(config &_c) : c{_c} {
     bodies = c.bodies;
     for (int i = 0; i < bodies; i++) {
         _data.push_back(c.x[i].x);
@@ -74,11 +75,11 @@ System2<Solver>::System2(config &_c) : c{_c} {
     }
 
     data = array(_data.data(), bodies * 7);
-    solver = new Solver([&](double t, array& Y, array& ret){this->compute_ac(t, Y, ret);}, data);
+    integrator = new Integrator([&](double t, array& Y, array& ret){this->compute_ac(t, Y, ret);}, data);
 }
 
-template <typename Solver>
-void System2<Solver>::compute_ac(double t, array &Y, array &ret) {
+template <typename Integrator>
+void System2<Integrator>::compute_ac(double t, array &Y, array &ret) {
     vecarray x = vecarray((vec3 *) Y.data_handle(), bodies);
     vecarray v = vecarray((vec3 *) Y.data_handle() + bodies, bodies);
     array m = array(Y.data_handle() + bodies * 6, bodies);
@@ -107,10 +108,10 @@ void System2<Solver>::compute_ac(double t, array &Y, array &ret) {
     } 
 }
 
-template <typename Solver>
-void System2<Solver>::run() {
+template <typename Integrator>
+void System2<Integrator>::run() {
     std::ofstream f;
-    f.open(solver->name + ".txt", std::ios::out);
+    f.open(integrator->name + ".txt", std::ios::out);
     f << "nbody;step;t;";
     for (int i = 0; i < bodies; i++) {
         f << "m" << i << ";";
@@ -127,23 +128,22 @@ void System2<Solver>::run() {
 
     compute_energies();
     save(f);
-    while (solver->t < target_t) {
-        solver->t += solver->dt;
-        solver->step();
+    while (integrator->t < target_t) {
+        integrator->t += integrator->dt;
+        integrator->step();
         compute_energies();
         save(f);
     }
 
     f.close();
-    std::cout << "haha" << std::endl;
 
     time_point<high_resolution_clock> t2 = high_resolution_clock::now();
-    std::cout << solver->name << ": ";
+    std::cout << integrator->name << ": ";
     std::cout << (t2 - t1).count() / 1e9 << "s" << std::endl;
 }
 
-template <typename Solver>
-void System2<Solver>::compute_energies() {
+template <typename Integrator>
+void System2<Integrator>::compute_energies() {
     size_t size = bodies * 3;
     vecarray x = vecarray((vec3 *) data.data_handle(), bodies);
     vecarray v = vecarray((vec3 *) data.data_handle() + bodies, bodies);
@@ -159,13 +159,13 @@ void System2<Solver>::compute_energies() {
     }
 }
 
-template <typename Solver>
-void System2<Solver>::save(std::ofstream &f) {
+template <typename Integrator>
+void System2<Integrator>::save(std::ofstream &f) {
     vecarray x = vecarray((vec3 *) data.data_handle(), bodies);
     vecarray v = vecarray((vec3 *) data.data_handle() + bodies, bodies);
     array m = array(data.data_handle() + bodies * 6, bodies);
 
-    f << bodies << ";" << solver->steps << ";" << solver->t << ";";
+    f << bodies << ";" << integrator->steps << ";" << integrator->t << ";";
     for (int i = 0; i < bodies; i++) {
         f << m[i] << ";" 
           << x[i].x << ";" << x[i].y << ";" << x[i].z << ";"

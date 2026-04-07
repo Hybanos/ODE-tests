@@ -1,7 +1,13 @@
 #include "odes.hpp"
 
+void Euler::step() {
+    f(t, Y, tmp);
+    for (int i = 0; i < nd; i++) {
+        Y[i] = Y[i] + tmp[i] * dt;
+    }
+}
+
 void RK4::step() {
-    int nd = Y.extent(0);
     f(t, Y, k1);
     for (int i = 0; i < nd; i++) {
         tmp[i] = Y[i] + k1[i] * 0.5 * dt;
