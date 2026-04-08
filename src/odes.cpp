@@ -7,6 +7,17 @@ void Euler::step() {
     }
 }
 
+void EulerSymplectic::step() {
+    f(t, x, tmp1);
+    for (int i = 0; i < nd; i++) {
+        v[i] = v[i] + tmp1[i] * dt;
+    }
+    g(t, v, tmp2);
+    for (int i = 0; i < nd; i++) {
+        x[i] = x[i] + tmp2[i] * dt;
+    } 
+}
+
 void RK4::step() {
     f(t, Y, k1);
     for (int i = 0; i < nd; i++) {

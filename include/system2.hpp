@@ -41,11 +41,15 @@ class System2 {
 
         std::vector<double> _data;
         array data;
+        array x;
+        array v;
+        array m;
 
         // kinetic and potential energies
         double K, U;
 
         void compute_ac(double t, array &Y, array &ret);
+        void compute_ac_order_2(double t, array &x, array &ret);
         void compute_energies();
         void save(std::ofstream &f);
     public:
@@ -75,14 +79,26 @@ System2<Integrator>::System2(config &_c) : c{_c} {
     }
 
     data = array(_data.data(), bodies * 7);
-    integrator = new Integrator([&](double t, array& Y, array& ret){this->compute_ac(t, Y, ret);}, data);
+    x = array(_data.data(), bodies * 3);
+    v = array(_data.data() + bodies * 3, bodies * 3);
+    m = array(_data.data() + bodies * 6, bodies);
+
+    // banger ???
+    if constexpr (std::is_base_of_v<FirstOrderODE, Integrator>) {
+        integrator = new Integrator([&](double t, array& Y, array& ret){this->compute_ac(t, Y, ret);}, data);
+    } else if constexpr (std::is_base_of_v<SecondOrderODE, Integrator>) {
+        integrator = new Integrator([&](double t, array& Y, array& ret){this->compute_ac_order_2(t, Y, ret);}, [&](double t, array& Y, array& ret){
+            for (int i = 0; i < this->bodies * 3; i++) ret[i] = Y[i];
+        }, x, v);
+    } else {
+       throw (std::bad_typeid());
+    }
 }
 
 template <typename Integrator>
 void System2<Integrator>::compute_ac(double t, array &Y, array &ret) {
-    vecarray x = vecarray((vec3 *) Y.data_handle(), bodies);
-    vecarray v = vecarray((vec3 *) Y.data_handle() + bodies, bodies);
-    array m = array(Y.data_handle() + bodies * 6, bodies);
+    vecarray x_v = vecarray((vec3 *) Y.data_handle(), bodies);
+    vecarray v_v = vecarray((vec3 *) Y.data_handle() + bodies, bodies);
     vecarray ret_v = vecarray((vec3 *) ret.data_handle(), bodies);
     vecarray ret_a = vecarray((vec3 *) ret.data_handle() + bodies, bodies);
 
@@ -90,22 +106,48 @@ void System2<Integrator>::compute_ac(double t, array &Y, array &ret) {
         vec3 a_i = vec3{0, 0, 0};
 
         for (int j = 0; j < i; j++) {
-            vec3 r = x[j] - x[i];
+            vec3 r = x_v[j] - x_v[i];
             double r_norm = r.norm();
             double r3 = r_norm * r_norm * r_norm; 
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 
         for (int j = i+1; j < bodies; j++) {
-            vec3 r = x[j] - x[i];
+            vec3 r = x_v[j] - x_v[i];
             double r_norm = r.norm();
             double r3 = r_norm * r_norm * r_norm; 
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 
         ret_a[i] = a_i / m[i];
-        ret_v[i] = v[i];
+        ret_v[i] = v_v[i];
     } 
+}
+
+template <typename Integrator>
+void System2<Integrator>::compute_ac_order_2(double t, array &_x, array &ret) {
+    vecarray x_v = vecarray((vec3 *) _x.data_handle(), bodies);
+    vecarray a_v = vecarray((vec3 *) ret.data_handle(), bodies);
+
+    for (int i = 0; i < bodies; i++) {
+        vec3 a_i = vec3{0, 0, 0};
+
+        for (int j = 0; j < i; j++) {
+            vec3 r = x_v[j] - x_v[i];
+            double r_norm = r.norm();
+            double r3 = r_norm * r_norm * r_norm; 
+            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+        }
+
+        for (int j = i+1; j < bodies; j++) {
+            vec3 r = x_v[j] - x_v[i];
+            double r_norm = r.norm();
+            double r3 = r_norm * r_norm * r_norm; 
+            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+        }
+
+        a_v[i] = a_i / m[i];
+    }
 }
 
 template <typename Integrator>
