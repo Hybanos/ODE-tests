@@ -98,7 +98,7 @@ class RK4_md : public System {
 
 class RK45 : public System {
     private:
-        double base_dt; 
+        double base_dt;
         double eps = 1e-3;
         double A[6] = {2.0/9.0, 1.0/3.0, 3.0/4.0, 1, 5.0/6.0};
         double B[6][5] = {

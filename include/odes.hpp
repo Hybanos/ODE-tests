@@ -77,6 +77,46 @@ class EulerSymplectic : public SecondOrderODE {
         void step();
 };
 
+class LeapFrog : public SecondOrderODE { 
+    private:
+        std::vector<double> _tmp1;
+        std::vector<double> _tmp2;
+        array tmp1;
+        array tmp2;
+    public:
+        LeapFrog(ftype f, ftype g, array &x, array &v) : SecondOrderODE(f, g, x, v, "LeapFrog") {
+            _tmp1.resize(nd);
+            _tmp2.resize(nd);
+            tmp1 = array(_tmp1.data(), nd);
+            tmp2 = array(_tmp2.data(), nd);
+        }
+        void step();
+};
+
+class RK2 : public FirstOrderODE {
+    private:
+        double theta = 0.5;
+        
+        std::vector<double> _k1;
+        std::vector<double> _k2;
+        std::vector<double> _tmp;
+
+        array k1;
+        array k2;
+        array tmp;
+    public:
+        void step();
+        RK2(ftype f, array &Y0) : FirstOrderODE(f, Y0, std::string("RK2") + std::to_string(2)) {
+            _k1.resize(nd);
+            _k2.resize(nd);
+            _tmp.resize(nd);
+
+            k1 = array(_k1.data(), nd);
+            k2 = array(_k2.data(), nd);
+            tmp = array(_tmp.data(), nd);
+        }
+};
+
 class RK4 : public FirstOrderODE {
     private:
         std::vector<double> _k1;
@@ -109,4 +149,59 @@ class RK4 : public FirstOrderODE {
 
             tmp = array(_tmp.data(), nd);
         };
+};
+
+class RK45 : public FirstOrderODE {
+    private:
+        double base_dt;
+        double eps = 1e-3;
+        double A[6] = {2.0/9.0, 1.0/3.0, 3.0/4.0, 1, 5.0/6.0};
+        double B[6][5] = {
+            {0,           0,           0,           0,         0},
+            {2.0/9.0,     0,           0,           0,         0},
+            {1.0/12.0,    1.0/4.0,     0,           0,         0},
+            {69.0/128.0, -243.0/128.0, 135.0/64.0,  0,         0},
+            {-17.0/12.0,  27.0/4.0,   -27.0/5.0,    16.0/15.0, 0},
+            {65.0/432.0, -5.0/16.0,    13.0/16.0,   4.0/27.0,  5.0/144.0}
+        };
+        double c[6] = {1.0/9.0, 0, 9.0/20.0, 16.0/45.0, 1.0/12.0};
+        double ch[6] = {47.0/450.0, 0, 12.0/25.0, 32.0/225.0, 1.0/30.0, 6.0/25.0};
+
+        std::vector<double> _k1;
+        std::vector<double> _k2;
+        std::vector<double> _k3;
+        std::vector<double> _k4;
+        std::vector<double> _k5;
+        std::vector<double> _k6;
+        std::vector<double> _tmp;
+
+        array k1;
+        array k2;
+        array k3;
+        array k4;
+        array k5;
+        array k6;
+        array tmp;
+
+    public:
+        void step();
+        RK45(ftype f, array &Y0) : FirstOrderODE(f, Y0, "RK45") {
+            base_dt = dt;
+
+            _k1.resize(nd);
+            _k2.resize(nd);
+            _k3.resize(nd);
+            _k4.resize(nd);
+            _k5.resize(nd);
+            _k6.resize(nd);
+            _tmp.resize(nd);
+
+            k1 = array(_k1.data(), nd);
+            k2 = array(_k2.data(), nd);
+            k3 = array(_k3.data(), nd);
+            k4 = array(_k4.data(), nd);
+            k5 = array(_k5.data(), nd);
+            k6 = array(_k6.data(), nd);
+            tmp = array(_tmp.data(), nd);
+        }
 };

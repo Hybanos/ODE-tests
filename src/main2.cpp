@@ -16,8 +16,11 @@ void haha() {
 int main() {
     f.open("index.txt", std::ios::out);
 
-    haha<System2<Euler>>();
+    // haha<System2<Euler>>();
     haha<System2<EulerSymplectic>>();
+    // haha<System2<LeapFrog>>();
+    // haha<System2<RK2>>();
+    haha<System2<RK45>>();
     // haha<System2<RK4>>();
 
     f.close();
