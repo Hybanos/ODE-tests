@@ -27,7 +27,7 @@ struct config {
 };
 
 template <typename Integrator>
-class System2 {
+class System {
     private:
         // initial configuration
         config c;
@@ -55,12 +55,12 @@ class System2 {
     public:
         void run();
         std::string get_name() {return integrator->name;}
-        System2(config &_c);
-        ~System2() {delete integrator;}
+        System(config &_c);
+        ~System() {delete integrator;}
 };
 
 template <typename Integrator>
-System2<Integrator>::System2(config &_c) : c{_c} {
+System<Integrator>::System(config &_c) : c{_c} {
     bodies = c.bodies;
     for (int i = 0; i < bodies; i++) {
         _data.push_back(c.x[i].x);
@@ -96,7 +96,7 @@ System2<Integrator>::System2(config &_c) : c{_c} {
 }
 
 template <typename Integrator>
-void System2<Integrator>::compute_ac(double t, array &Y, array &ret) {
+void System<Integrator>::compute_ac(double t, array &Y, array &ret) {
     vecarray x_v = vecarray((vec3 *) Y.data_handle(), bodies);
     vecarray v_v = vecarray((vec3 *) Y.data_handle() + bodies, bodies);
     vecarray ret_v = vecarray((vec3 *) ret.data_handle(), bodies);
@@ -125,7 +125,7 @@ void System2<Integrator>::compute_ac(double t, array &Y, array &ret) {
 }
 
 template <typename Integrator>
-void System2<Integrator>::compute_ac_order_2(double t, array &_x, array &ret) {
+void System<Integrator>::compute_ac_order_2(double t, array &_x, array &ret) {
     vecarray x_v = vecarray((vec3 *) _x.data_handle(), bodies);
     vecarray a_v = vecarray((vec3 *) ret.data_handle(), bodies);
 
@@ -151,7 +151,7 @@ void System2<Integrator>::compute_ac_order_2(double t, array &_x, array &ret) {
 }
 
 template <typename Integrator>
-void System2<Integrator>::run() {
+void System<Integrator>::run() {
     std::ofstream f;
     f.open(integrator->name + ".txt", std::ios::out);
     f << "nbody;step;t;";
@@ -185,7 +185,7 @@ void System2<Integrator>::run() {
 }
 
 template <typename Integrator>
-void System2<Integrator>::compute_energies() {
+void System<Integrator>::compute_energies() {
     size_t size = bodies * 3;
     vecarray x = vecarray((vec3 *) data.data_handle(), bodies);
     vecarray v = vecarray((vec3 *) data.data_handle() + bodies, bodies);
@@ -202,7 +202,7 @@ void System2<Integrator>::compute_energies() {
 }
 
 template <typename Integrator>
-void System2<Integrator>::save(std::ofstream &f) {
+void System<Integrator>::save(std::ofstream &f) {
     vecarray x = vecarray((vec3 *) data.data_handle(), bodies);
     vecarray v = vecarray((vec3 *) data.data_handle() + bodies, bodies);
     array m = array(data.data_handle() + bodies * 6, bodies);

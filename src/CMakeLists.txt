@@ -1,11 +1,11 @@
-add_executable(main2)
+add_executable(main)
 
-target_sources(main2 PRIVATE
-    main2.cpp
+target_sources(main PRIVATE
+    main.cpp
     
-    system2.cpp
+    system.cpp
     odes.cpp
 )
 
 include_directories(../include)
-target_link_libraries(main2 PRIVATE mdspan::mdspan)
+target_link_libraries(main PRIVATE mdspan::mdspan)

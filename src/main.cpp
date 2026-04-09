@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "system2.hpp"
+#include "system.hpp"
 
 config c(4, 40);
 std::ofstream f; 
@@ -21,8 +21,8 @@ int main() {
     // haha<System2<LeapFrog>>();
     // haha<System2<RK2>>();
     // haha<System2<RK4>>();
-    haha<System2<RK45>>();
-    haha<System2<DOP853>>();
+    haha<System<RK45>>();
+    haha<System<DOP853>>();
 
     f.close();
 }
