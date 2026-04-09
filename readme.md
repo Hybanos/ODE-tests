@@ -1,12 +1,14 @@
 This repo contains a few of the most common methods for solving the n-body problem.
 
 Currently implmented:
- - Exact analytical solution (only for 2 bodies)
+ - ~~Exact analytical solution (only for 2 bodies)~~
  - Euler
  - Symplectic Euler
  - LeapFrog
  - RK2
  - RK4
+ - RK4(5)
+ - DOP8(5,3)
 
 https://github.com/user-attachments/assets/c05d0783-b1b9-4470-976a-01f7c282c02a
 
