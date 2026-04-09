@@ -7,9 +7,13 @@
 #include <mdspan/mdspan.hpp>
 
 #include "vec3.hpp"
-#include "system.hpp"
 #include "dop853coefs.hpp"
 
+namespace stdex = Kokkos;
+
+using extents = stdex::extents<int, stdex::dynamic_extent>;
+using array = stdex::mdspan<double, extents>;
+using vecarray = stdex::mdspan<vec3, extents>;
 using ftype = std::function<void(double t, array& Y, array& ret)>;
 
 class ODE {
