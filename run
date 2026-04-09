@@ -10,7 +10,7 @@ fi
 cmake -B build $build -DCMAKE_BUILD_TYPE=Debug || exit
 cmake --build build || exit
 
-build/src/main2 exit
+build/src/main exit
 
 cd visu
 
