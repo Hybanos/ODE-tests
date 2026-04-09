@@ -205,7 +205,6 @@ void RK4_md::step() {
     }
 }
 
-
 void RK45::step() {
     std::vector<vec3> k1(m.size());
     std::vector<vec3> k2(m.size());

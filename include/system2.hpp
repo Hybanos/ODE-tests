@@ -37,7 +37,7 @@ class System2 {
         int bodies;
         double gamma = 1;
         // double target_t = 0.001;
-        double target_t = 30;
+        double target_t = 90;
 
         std::vector<double> _data;
         array data;

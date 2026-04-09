@@ -154,7 +154,7 @@ class RK4 : public FirstOrderODE {
 class RK45 : public FirstOrderODE {
     private:
         double base_dt;
-        double eps = 1e-3;
+        double eps = 1e-12;
         double A[6] = {2.0/9.0, 1.0/3.0, 3.0/4.0, 1, 5.0/6.0};
         double B[6][5] = {
             {0,           0,           0,           0,         0},
@@ -204,4 +204,72 @@ class RK45 : public FirstOrderODE {
             k6 = array(_k6.data(), nd);
             tmp = array(_tmp.data(), nd);
         }
+};
+
+class DOP853 : public FirstOrderODE {
+    private:
+        double base_dt;    
+        double a_tol = 1e-6;
+        double r_tol = 1e-12;
+
+        double beta = 0;
+
+        double safe = 0.9;
+        double fac1 = 0.3333;
+        double facc1 = 1.0 / fac1;
+        double facold = 1e-4;
+
+        std::vector<double>  _k1;
+        std::vector<double>  _k2;
+        std::vector<double>  _k3;
+        std::vector<double>  _k4;
+        std::vector<double>  _k5;
+        std::vector<double>  _k6;
+        std::vector<double>  _k7;
+        std::vector<double>  _k8;
+        std::vector<double>  _k9;
+        std::vector<double> _k10;
+        std::vector<double> _tmp;
+
+        array  k1;
+        array  k2;
+        array  k3;
+        array  k4;
+        array  k5;
+        array  k6;
+        array  k7;
+        array  k8;
+        array  k9;
+        array k10;
+        array tmp;
+    public:
+        void step();
+        DOP853(ftype f, array &Y0) : FirstOrderODE(f, Y0, "DOP853") {
+            base_dt = dt;
+
+            _k1.resize(nd);
+            _k2.resize(nd);
+            _k3.resize(nd);
+            _k4.resize(nd);
+            _k5.resize(nd);
+            _k6.resize(nd);
+            _k7.resize(nd);
+            _k8.resize(nd);
+            _k9.resize(nd);
+            _k10.resize(nd);
+            _tmp.resize(nd);
+
+            k1 = array(_k1.data(), nd);
+            k2 = array(_k2.data(), nd);
+            k3 = array(_k3.data(), nd);
+            k4 = array(_k4.data(), nd);
+            k5 = array(_k5.data(), nd);
+            k6 = array(_k6.data(), nd);
+            k7 = array(_k7.data(), nd);
+            k8 = array(_k8.data(), nd);
+            k9 = array(_k9.data(), nd);
+            k10 =array(_k10.data(), nd);
+            tmp =array(_tmp.data(), nd);
+        }
+        
 };
