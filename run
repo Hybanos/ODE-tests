@@ -12,11 +12,11 @@ cmake --build build || exit
 
 build/src/main exit
 
-cd visu
+cd scripts
 
 if [ ! -d ./venv ]; then
      python3 -m venv venv
      venv/bin/pip install manim matplotlib
 fi
 
-venv/bin/manim -qm -p anim.py || exit
+./venv/bin/manim -qm -p anim.py || exit

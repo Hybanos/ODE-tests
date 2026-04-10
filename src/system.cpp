@@ -3,9 +3,10 @@
 using std::chrono::high_resolution_clock;
 using std::chrono::time_point;
 
-config::config(int _bodies, int _seed) {
-    int seed = _seed;
+config::config(int _bodies, double _target_t, int _seed) {
+    seed = _seed;
     bodies = _bodies;
+    target_t = _target_t;
 
     m.resize(bodies);
     x.resize(bodies);

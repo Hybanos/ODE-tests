@@ -23,7 +23,9 @@ class ODE {
         double t = 0;
         double dt = 0.001;
         int steps = 0;
+        int f_evals = 0;
         std::string name = "ODE";
+
 
         virtual void step() = 0;
         ODE(std::string _name) : name{_name} {}
@@ -158,7 +160,7 @@ class RK4 : public FirstOrderODE {
 class RK45 : public FirstOrderODE {
     private:
         double base_dt;
-        double eps = 1e-12;
+        double eps = 1e-6;
         double A[6] = {2.0/9.0, 1.0/3.0, 3.0/4.0, 1, 5.0/6.0};
         double B[6][5] = {
             {0,           0,           0,           0,         0},
@@ -214,7 +216,7 @@ class DOP853 : public FirstOrderODE {
     private:
         double base_dt;    
         double a_tol = 1e-6;
-        double r_tol = 1e-12;
+        double r_tol = 0;
 
         double beta = 0;
 

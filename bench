@@ -1,0 +1,13 @@
+#!/usr/bin/bash
+
+build=""
+
+if [ -f /usr/bin/ninja ]; then
+     build="-G Ninja"
+fi
+
+cmake -B build $build -DCMAKE_BUILD_TYPE=Release || exit
+# cmake -B build $build -DCMAKE_BUILD_TYPE=Debug || exit
+cmake --build build || exit
+
+scripts/venv/bin/python3 scripts/bench.py

@@ -5,6 +5,7 @@ void Euler::step() {
     for (int i = 0; i < nd; i++) {
         Y[i] = Y[i] + tmp[i] * dt;
     }
+    f_evals += 1;
 }
 
 void EulerSymplectic::step() {
@@ -16,6 +17,8 @@ void EulerSymplectic::step() {
     for (int i = 0; i < nd; i++) {
         x[i] = x[i] + tmp2[i] * dt;
     } 
+    // 2 ?
+    f_evals += 1;
 }
 
 void LeapFrog::step() {
@@ -28,6 +31,7 @@ void LeapFrog::step() {
     for (int i = 0; i < nd; i++) {
         v[i] = v[i] + (tmp1[i] + tmp2[i]) * dt * 0.5;
     }
+    f_evals += 2;
 }
 
 void RK2::step() {
@@ -40,6 +44,7 @@ void RK2::step() {
     for (int i = 0; i < nd; i++) {
         Y[i] = Y[i] + ((1 - 0.5 * theta) * k1[i] + 0.5 * theta * k2[i]) * dt;
     }
+    f_evals += 2;
 }
 
 void RK4::step() {
@@ -63,6 +68,7 @@ void RK4::step() {
     for (int i = 0; i < nd; i++) {
         Y[i] = Y[i] + (k1[i] + k2[i]*2 + k3[i]*2 + k4[i]) * dt / 6;
     }
+    f_evals += 4;
 }
 
 void RK45::step() {
@@ -102,6 +108,7 @@ void RK45::step() {
         sum_e = std::abs(sum_e) * nd;
 
         dt = 0.9 * dt * std::pow(eps / sum_e, 1.0/5.0);
+        f_evals += 6;
     } while (sum_e > eps);
 
     for (int i = 0; i < nd; i++) {
@@ -204,6 +211,8 @@ void DOP853::step() {
         double fac = fac11 / std::pow(facold, beta);
         fac = std::max(1.0/6, std::min(facc1, fac/safe));
         // std::cout << steps << " " << dt << " " << err << std::endl;
+
+        f_evals += 12;
         if (err < 1.0) {
             facold = std::max(err, 1e-4);
             dt = dt / fac;

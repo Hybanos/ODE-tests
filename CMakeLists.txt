@@ -13,4 +13,3 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(mdspan)
 
 add_subdirectory(src)
-target_compile_features(main PRIVATE cxx_std_23)

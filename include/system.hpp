@@ -17,13 +17,14 @@ using std::chrono::time_point;
 
 struct config {
     int bodies;
+    int seed;
     double target_t;
 
     std::vector<vec3> x;
     std::vector<vec3> v;
     std::vector<double> m;
 
-    config(int _bodies, int _seed);
+    config(int _bodies, double _target_t, int _seed);
 };
 
 template <typename Integrator>
@@ -36,8 +37,7 @@ class System {
 
         int bodies;
         double gamma = 1;
-        // double target_t = 0.001;
-        double target_t = 90;
+        double eps_r = 1e-4;
 
         std::vector<double> _data;
         array data;
@@ -48,6 +48,8 @@ class System {
         // kinetic and potential energies
         double K, U;
 
+        bool save_results;
+
         void compute_ac(double t, array &Y, array &ret);
         void compute_ac_order_2(double t, array &x, array &ret);
         void compute_energies();
@@ -55,12 +57,12 @@ class System {
     public:
         void run();
         std::string get_name() {return integrator->name;}
-        System(config &_c);
+        System(config &_c, bool _save_results = true);
         ~System() {delete integrator;}
 };
 
 template <typename Integrator>
-System<Integrator>::System(config &_c) : c{_c} {
+System<Integrator>::System(config &_c, bool _save_results) : c{_c}, save_results{_save_results} {
     bodies = c.bodies;
     for (int i = 0; i < bodies; i++) {
         _data.push_back(c.x[i].x);
@@ -108,14 +110,14 @@ void System<Integrator>::compute_ac(double t, array &Y, array &ret) {
         for (int j = 0; j < i; j++) {
             vec3 r = x_v[j] - x_v[i];
             double r_norm = r.norm();
-            double r3 = r_norm * r_norm * r_norm; 
+            double r3 = r_norm * r_norm * r_norm + eps_r; 
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 
         for (int j = i+1; j < bodies; j++) {
             vec3 r = x_v[j] - x_v[i];
             double r_norm = r.norm();
-            double r3 = r_norm * r_norm * r_norm; 
+            double r3 = r_norm * r_norm * r_norm + eps_r; 
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 
@@ -135,14 +137,14 @@ void System<Integrator>::compute_ac_order_2(double t, array &_x, array &ret) {
         for (int j = 0; j < i; j++) {
             vec3 r = x_v[j] - x_v[i];
             double r_norm = r.norm();
-            double r3 = r_norm * r_norm * r_norm; 
+            double r3 = r_norm * r_norm * r_norm + eps_r; 
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 
         for (int j = i+1; j < bodies; j++) {
             vec3 r = x_v[j] - x_v[i];
             double r_norm = r.norm();
-            double r3 = r_norm * r_norm * r_norm; 
+            double r3 = r_norm * r_norm * r_norm + eps_r;
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 
@@ -169,19 +171,23 @@ void System<Integrator>::run() {
     time_point<high_resolution_clock> t1 = high_resolution_clock::now();
 
     compute_energies();
-    save(f);
-    while (integrator->t < target_t) {
+    if (save_results) save(f);
+    while (integrator->t < c.target_t) {
         integrator->t += integrator->dt;
         integrator->step();
+        integrator->steps++;
         compute_energies();
-        save(f);
+        if (save_results) save(f);
     }
 
     f.close();
 
     time_point<high_resolution_clock> t2 = high_resolution_clock::now();
-    std::cout << integrator->name << ": ";
-    std::cout << (t2 - t1).count() / 1e9 << "s" << std::endl;
+    std::cout << integrator->name << ";\t";
+    std::cout << (t2 - t1).count() / 1e9 << "s;\t"
+              << integrator->steps << ";\t"
+              << integrator->f_evals
+              << std::endl;
 }
 
 template <typename Integrator>
