@@ -4,19 +4,19 @@
 #include "system.hpp"
 
 template <typename T>
-void haha(config c) {
-    T s(c, false);
+void haha(config c, bool save) {
+    T s(c, save);
     s.run();
 }
 
-void run_all(config c) {
-    haha<System<Euler>>(c);
-    haha<System<EulerSymplectic>>(c);
-    haha<System<LeapFrog>>(c);
-    haha<System<RK2>>(c);
-    haha<System<RK4>>(c);
-    haha<System<RK45>>(c);
-    haha<System<DOP853>>(c);
+void run_all(config c, bool save) {
+    haha<System<Euler>>(c, save);
+    haha<System<EulerSymplectic>>(c, save);
+    haha<System<LeapFrog>>(c, save);
+    haha<System<RK2>>(c, save);
+    haha<System<RK4>>(c, save);
+    haha<System<RK45>>(c, save);
+    haha<System<DOP853>>(c, save);
 }
 
 int main(int argc, char *argv[]) {
@@ -28,10 +28,10 @@ int main(int argc, char *argv[]) {
     bodies = std::stoi(argv[1]);
     target_t = std::stod(argv[2]);
     seed = std::stod(argv[3]);
-    if (argc == 5 && argv[4] == "true") save = true;
+    if (argc == 5 && argv[4][0] == 't') save = true;
 
     config c(bodies, target_t, seed);
-    run_all(c);
+    run_all(c, save);
 
     return 0;
 }

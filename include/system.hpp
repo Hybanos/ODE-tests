@@ -6,6 +6,7 @@
 #include <fstream>
 #include <chrono>
 #include <vector>
+#include <iomanip>
 
 #include <mdspan/mdspan.hpp>
 
@@ -37,7 +38,8 @@ class System {
 
         int bodies;
         double gamma = 1;
-        double eps_r = 1e-4;
+        // double eps_r = 1e-4;
+        double eps_r = 0;
 
         std::vector<double> _data;
         array data;
@@ -213,7 +215,8 @@ void System<Integrator>::save(std::ofstream &f) {
     vecarray v = vecarray((vec3 *) data.data_handle() + bodies, bodies);
     array m = array(data.data_handle() + bodies * 6, bodies);
 
-    f << bodies << ";" << integrator->steps << ";" << integrator->t << ";";
+    f << std::setprecision(10)
+      << bodies << ";" << integrator->steps << ";" << integrator->t << ";";
     for (int i = 0; i < bodies; i++) {
         f << m[i] << ";" 
           << x[i].x << ";" << x[i].y << ";" << x[i].z << ";"
