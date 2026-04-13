@@ -1,6 +1,9 @@
 build/
 .vscode/
 *.txt
+*.svg
+*.html
+*.pdf
 __pycache__
 media/
 venv

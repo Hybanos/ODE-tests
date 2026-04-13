@@ -48,8 +48,9 @@ def no_save():
 def save():
     data = {}
 
-    sizes = [10]
+    sizes = [4]
     target_ts = [10]
+    max_n = len(sizes)
 
     for i, s, t in zip(list(range(max_n)), sizes, target_ts):
         print(f"{s} bodies. target_t: {t}")
@@ -72,6 +73,8 @@ def save():
             data[name]["f_evals"][i] = f_evals
         print("")
 
+    print(data)
+    _i = 0
     for name, color in zip(data.keys(), colors):
         lines = []
         with open(f"{name}.txt", "r") as f:
@@ -83,20 +86,47 @@ def save():
         err_momentum = []
         x = []
         for i in range(1, len(lines)):
-            err_energy.append((float(lines[i].split(";")[-1]) - e_energy) / abs(e_energy))
-            err_momentum.append((float(lines[i].split(";")[-4]) - e_momentum) / abs(e_momentum))
+            err_energy.append(abs(float(lines[i].split(";")[-1]) - e_energy) / abs(e_energy))
+            err_momentum.append(abs(float(lines[i].split(";")[-4]) - e_momentum) / abs(e_momentum))
             x.append(float(lines[i].split(";")[2]))
 
+        plt.figure(0)
+        plt.step(x, err_energy, label=f"energy", color=color)
+        plt.step(x, err_momentum, label=f"momentum", linestyle="dotted", color=color)
+        plt.figure(1)
         plt.step(x, err_energy, label=name, color=color)
-        plt.step(x, err_momentum, label=f"{name} - angular mom.", linestyle="dotted", color=color)
+        plt.figure(2)
+        plt.step(x, err_momentum, label=name, color=color)
     
-    plt.title("Relative error")
-    plt.xlabel("step")
-    plt.ylabel("e")
-    # plt.yscale("log", base=10)
+        plt.figure(0)
+        plt.title(f"Relative error - {name}")
+        plt.xlabel("t")
+        plt.ylabel("err")
+        plt.yscale("log", base=10)
+        plt.grid(True)
+        plt.legend()
+        plt.savefig(f"scripts/imgs/err_{_i}_{name}.svg")
+        plt.cla()
+
+        _i += 1
+
+    plt.figure(1)
+    plt.title(f"Relative error - energy")
+    plt.xlabel("t")
+    plt.ylabel("err")
+    plt.yscale("log", base=10)
     plt.grid(True)
     plt.legend()
-    plt.show()
+    plt.savefig(f"scripts/imgs/err_all_energy.svg")
 
-no_save()
+    plt.figure(2)
+    plt.title(f"Relative error - angular momentum")
+    plt.xlabel("t")
+    plt.ylabel("err")
+    plt.yscale("log", base=10)
+    plt.grid(True)
+    plt.legend()
+    plt.savefig(f"scripts/imgs/err_all_momentum.svg")
+
+# no_save()
 save()

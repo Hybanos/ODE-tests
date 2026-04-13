@@ -66,7 +66,7 @@ void RK4::step() {
     f(t + dt, tmp, k4);
 
     for (int i = 0; i < nd; i++) {
-        Y[i] = Y[i] + (k1[i] + k2[i]*2 + k3[i]*2 + k4[i]) * dt / 6;
+        Y[i] = Y[i] + (k1[i] + k2[i]*2.0 + k3[i]*2.0 + k4[i]) * dt / 6.0;
     }
     f_evals += 4;
 }

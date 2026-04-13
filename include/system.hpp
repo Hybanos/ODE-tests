@@ -38,7 +38,7 @@ class System {
 
         int bodies;
         double gamma = 1;
-        double eps_r = 1e-5;
+        double eps_r = 1e-6;
         // double eps_r = 0;
 
         std::vector<double> _data;
@@ -204,10 +204,10 @@ void System<Integrator>::compute_energies() {
     vecarray v = vecarray((vec3 *) data.data_handle() + bodies, bodies);
     array m = array(data.data_handle() + bodies * 6, bodies);
 
-    K = 0;
-    U = 0;
+    K = 0.0;
+    U = 0.0;
     for (int i = 0; i < bodies; i++) {
-        K += v[i].norm() * v[i].norm() * m[i] / 2;
+        K += v[i].norm() * v[i].norm() * m[i] / 2.0;
         for (int j = i+1; j < m.size(); j++) {
             U += -gamma * m[i] * m[j] / (x[j] - x[i]).norm();
         }

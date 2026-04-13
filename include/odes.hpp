@@ -160,7 +160,7 @@ class RK4 : public FirstOrderODE {
 class RK45 : public FirstOrderODE {
     private:
         double base_dt;
-        double eps = 1e-6;
+        double eps = 1e-18;
         double A[6] = {2.0/9.0, 1.0/3.0, 3.0/4.0, 1, 5.0/6.0};
         double B[6][5] = {
             {0,           0,           0,           0,         0},
@@ -215,7 +215,7 @@ class RK45 : public FirstOrderODE {
 class DOP853 : public FirstOrderODE {
     private:
         double base_dt;    
-        double a_tol = 1e-6;
+        double a_tol = 1e-18;
         double r_tol = 0;
 
         double beta = 0;

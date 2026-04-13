@@ -7,7 +7,12 @@ if [ -f /usr/bin/ninja ]; then
 fi
 
 cmake -B build $build -DCMAKE_BUILD_TYPE=Release || exit
-# cmake -B build $build -DCMAKE_BUILD_TYPE=Debug || exit
 cmake --build build || exit
 
+if [ ! -d ./scripts/imgs ]; then
+     mkdir scripts/imgs
+fi
+
+rm scripts/imgs/*.svg
 scripts/venv/bin/python3 scripts/bench.py
+scripts/venv/bin/python3 scripts/gen_pdf.py

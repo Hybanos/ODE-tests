@@ -16,7 +16,7 @@ cd scripts
 
 if [ ! -d ./venv ]; then
      python3 -m venv venv
-     venv/bin/pip install manim matplotlib
+     venv/bin/pip install -r ./requirements.txt || exit
 fi
 
 ./venv/bin/manim -qm -p anim.py || exit
