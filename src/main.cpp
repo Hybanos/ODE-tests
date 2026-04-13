@@ -3,7 +3,7 @@
 
 #include "system.hpp"
 
-config c(32, 10, 30);
+config c(2, 10, 30);
 std::ofstream f; 
 
 template <typename T>
@@ -22,7 +22,7 @@ int main() {
     // haha<System<RK2>>();
     // haha<System<RK4>>();
     haha<System<RK45>>();
-    haha<System<DOP853>>();
+    // haha<System<DOP853>>();
 
     f.close();
 }

@@ -38,8 +38,8 @@ class System {
 
         int bodies;
         double gamma = 1;
-        // double eps_r = 1e-4;
-        double eps_r = 0;
+        double eps_r = 1e-5;
+        // double eps_r = 0;
 
         std::vector<double> _data;
         array data;
@@ -49,12 +49,15 @@ class System {
 
         // kinetic and potential energies
         double K, U;
+        // angular momentum
+        vec3 A;
 
         bool save_results;
 
         void compute_ac(double t, array &Y, array &ret);
         void compute_ac_order_2(double t, array &x, array &ret);
         void compute_energies();
+        void compute_angular_momentum();
         void save(std::ofstream &f);
     public:
         void run();
@@ -168,17 +171,19 @@ void System<Integrator>::run() {
         f << "v" << i << ".y;";
         f << "v" << i << ".z;";
     }
-    f << "K;U;K+U" << std::endl;;
+    f << "A_norm;K;U;K+U" << std::endl;;
 
     time_point<high_resolution_clock> t1 = high_resolution_clock::now();
 
     compute_energies();
+    compute_angular_momentum();
     if (save_results) save(f);
     while (integrator->t < c.target_t) {
         integrator->t += integrator->dt;
         integrator->step();
         integrator->steps++;
         compute_energies();
+        compute_angular_momentum();
         if (save_results) save(f);
     }
 
@@ -210,6 +215,16 @@ void System<Integrator>::compute_energies() {
 }
 
 template <typename Integrator>
+void System<Integrator>::compute_angular_momentum() {
+    vecarray x = vecarray((vec3 *) data.data_handle(), bodies);
+    vecarray v = vecarray((vec3 *) data.data_handle() + bodies, bodies);
+    A = vec3{0, 0, 0}; 
+    for (int i = 0; i < bodies; i++) {
+        A = A + v[i].prod(x[i]);
+    }
+}
+
+template <typename Integrator>
 void System<Integrator>::save(std::ofstream &f) {
     vecarray x = vecarray((vec3 *) data.data_handle(), bodies);
     vecarray v = vecarray((vec3 *) data.data_handle() + bodies, bodies);
@@ -223,6 +238,6 @@ void System<Integrator>::save(std::ofstream &f) {
           << v[i].x << ";" << v[i].y << ";" << v[i].z << ";";
     }
 
-    f << K << ";" << U << ";" << K+U
+    f << A.norm() << ";" << K << ";" << U << ";" << K+U
       << std::endl;
 }
