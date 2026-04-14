@@ -72,7 +72,7 @@ void RK4::step() {
 }
 
 void RK45::step() {
-    double sum_e;
+    fpoint_t sum_e;
     do {
         f(t, Y, k1);
         for (int i = 0; i < nd; i++) {
@@ -123,7 +123,7 @@ void DOP853::step() {
     // NOTE: ref impl takes an educated guess on the value of dt for step 0,
     // we're skipping that i'm lazy
 
-    double err = 0;
+    fpoint_t err = 0;
     do {
         f(t, Y, k1);
         for (int i = 0; i < nd; i++) {
@@ -194,27 +194,27 @@ void DOP853::step() {
 
         // error estimation
         err = 0.0;
-        double err_2 = 0.0;
+        fpoint_t err_2 = 0.0;
         for (int i = 0; i < nd; i++) {
-            double sk = a_tol + r_tol * std::max(std::abs(Y[i]), std::abs(k5[i]));
-            double err_i = k4[i] - k1[i] * bhh1 - k9[i] * bhh2 - k3[i] * bhh3;
+            fpoint_t sk = a_tol + r_tol * std::max(std::abs(Y[i]), std::abs(k5[i]));
+            fpoint_t err_i = k4[i] - k1[i] * bhh1 - k9[i] * bhh2 - k3[i] * bhh3;
             err_2 = err_2 + (err_i / sk) * (err_i / sk);
             err_i = k1[i] * er1 + k6[i] * er6 + k7[i] * er7 + k8[i] * er8 + k9[i] * er9 + k10[i] * er10 + k2[i] * er11 + k3[i] * er12;
             err = err + (err_i / sk) * (err_i / sk);
         }
 
-        double deno = err + 0.01 * err_2;
+        fpoint_t deno = err + 0.01 * err_2;
         if (deno <= 0) deno = 1.0;
         err = dt * err * std::sqrt(1.0 / (nd * deno));
         // new dt 
-        double fac11 = std::pow(err, 1.0 / 8.0 - beta * 0.2);
-        double fac = fac11 / std::pow(facold, beta);
-        fac = std::max(1.0/6, std::min(facc1, fac/safe));
+        fpoint_t fac11 = std::pow(err, 1.0 / 8.0 - beta * 0.2);
+        fpoint_t fac = fac11 / std::pow(facold, beta);
+        fac = std::max((fpoint_t) 1.0/6, std::min(facc1, fac/safe));
         // std::cout << steps << " " << dt << " " << err << std::endl;
 
         f_evals += 12;
         if (err < 1.0) {
-            facold = std::max(err, 1e-4);
+            facold = std::max(err, (fpoint_t) 1e-4);
             dt = dt / fac;
             break;
         }

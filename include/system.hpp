@@ -12,6 +12,7 @@
 
 #include "vec3.hpp"
 #include "odes.hpp"
+#include "defs.hpp"
 
 using std::chrono::high_resolution_clock;
 using std::chrono::time_point;
@@ -19,13 +20,13 @@ using std::chrono::time_point;
 struct config {
     int bodies;
     int seed;
-    double target_t;
+    fpoint_t target_t;
 
     std::vector<vec3> x;
     std::vector<vec3> v;
-    std::vector<double> m;
+    std::vector<fpoint_t> m;
 
-    config(int _bodies, double _target_t, int _seed);
+    config(int _bodies, fpoint_t _target_t, int _seed);
 };
 
 template <typename Integrator>
@@ -37,25 +38,25 @@ class System {
         Integrator *integrator = nullptr;
 
         int bodies;
-        double gamma = 1;
-        double eps_r = 1e-6;
-        // double eps_r = 0;
+        fpoint_t gamma = 1;
+        fpoint_t eps_r = 1e-6;
+        // fpoint_t eps_r = 0;
 
-        std::vector<double> _data;
+        std::vector<fpoint_t> _data;
         array data;
         array x;
         array v;
         array m;
 
         // kinetic and potential energies
-        double K, U;
+        fpoint_t K, U;
         // angular momentum
         vec3 A;
 
         bool save_results;
 
-        void compute_ac(double t, array &Y, array &ret);
-        void compute_ac_order_2(double t, array &x, array &ret);
+        void compute_ac(fpoint_t t, array &Y, array &ret);
+        void compute_ac_order_2(fpoint_t t, array &x, array &ret);
         void compute_energies();
         void compute_angular_momentum();
         void save(std::ofstream &f);
@@ -92,9 +93,9 @@ System<Integrator>::System(config &_c, bool _save_results) : c{_c}, save_results
 
     // banger ???
     if constexpr (std::is_base_of_v<FirstOrderODE, Integrator>) {
-        integrator = new Integrator([&](double t, array& Y, array& ret){this->compute_ac(t, Y, ret);}, data);
+        integrator = new Integrator([&](fpoint_t t, array& Y, array& ret){this->compute_ac(t, Y, ret);}, data);
     } else if constexpr (std::is_base_of_v<SecondOrderODE, Integrator>) {
-        integrator = new Integrator([&](double t, array& Y, array& ret){this->compute_ac_order_2(t, Y, ret);}, [&](double t, array& Y, array& ret){
+        integrator = new Integrator([&](fpoint_t t, array& Y, array& ret){this->compute_ac_order_2(t, Y, ret);}, [&](fpoint_t t, array& Y, array& ret){
             for (int i = 0; i < this->bodies * 3; i++) ret[i] = Y[i];
         }, x, v);
     } else {
@@ -103,7 +104,7 @@ System<Integrator>::System(config &_c, bool _save_results) : c{_c}, save_results
 }
 
 template <typename Integrator>
-void System<Integrator>::compute_ac(double t, array &Y, array &ret) {
+void System<Integrator>::compute_ac(fpoint_t t, array &Y, array &ret) {
     vecarray x_v = vecarray((vec3 *) Y.data_handle(), bodies);
     vecarray v_v = vecarray((vec3 *) Y.data_handle() + bodies, bodies);
     vecarray ret_v = vecarray((vec3 *) ret.data_handle(), bodies);
@@ -114,15 +115,15 @@ void System<Integrator>::compute_ac(double t, array &Y, array &ret) {
 
         for (int j = 0; j < i; j++) {
             vec3 r = x_v[j] - x_v[i];
-            double r_norm = r.norm();
-            double r3 = r_norm * r_norm * r_norm + eps_r; 
+            fpoint_t r_norm = r.norm();
+            fpoint_t r3 = r_norm * r_norm * r_norm + eps_r; 
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 
         for (int j = i+1; j < bodies; j++) {
             vec3 r = x_v[j] - x_v[i];
-            double r_norm = r.norm();
-            double r3 = r_norm * r_norm * r_norm + eps_r; 
+            fpoint_t r_norm = r.norm();
+            fpoint_t r3 = r_norm * r_norm * r_norm + eps_r; 
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 
@@ -132,7 +133,7 @@ void System<Integrator>::compute_ac(double t, array &Y, array &ret) {
 }
 
 template <typename Integrator>
-void System<Integrator>::compute_ac_order_2(double t, array &_x, array &ret) {
+void System<Integrator>::compute_ac_order_2(fpoint_t t, array &_x, array &ret) {
     vecarray x_v = vecarray((vec3 *) _x.data_handle(), bodies);
     vecarray a_v = vecarray((vec3 *) ret.data_handle(), bodies);
 
@@ -141,15 +142,15 @@ void System<Integrator>::compute_ac_order_2(double t, array &_x, array &ret) {
 
         for (int j = 0; j < i; j++) {
             vec3 r = x_v[j] - x_v[i];
-            double r_norm = r.norm();
-            double r3 = r_norm * r_norm * r_norm + eps_r; 
+            fpoint_t r_norm = r.norm();
+            fpoint_t r3 = r_norm * r_norm * r_norm + eps_r; 
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 
         for (int j = i+1; j < bodies; j++) {
             vec3 r = x_v[j] - x_v[i];
-            double r_norm = r.norm();
-            double r3 = r_norm * r_norm * r_norm + eps_r;
+            fpoint_t r_norm = r.norm();
+            fpoint_t r3 = r_norm * r_norm * r_norm + eps_r;
             a_i = a_i + r * gamma * m[i] * m[j] / r3;
         }
 

@@ -21,7 +21,7 @@ void run_all(config c, bool save) {
 
 int main(int argc, char *argv[]) {
     int bodies;
-    double target_t, seed;
+    fpoint_t target_t, seed;
     bool save = false;
 
     if (argc < 4) exit(1);

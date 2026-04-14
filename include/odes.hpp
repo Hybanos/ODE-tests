@@ -8,20 +8,21 @@
 
 #include "vec3.hpp"
 #include "dop853coefs.hpp"
+#include "defs.hpp"
 
 namespace stdex = Kokkos;
 
 using extents = stdex::extents<int, stdex::dynamic_extent>;
-using array = stdex::mdspan<double, extents>;
+using array = stdex::mdspan<fpoint_t, extents>;
 using vecarray = stdex::mdspan<vec3, extents>;
-using ftype = std::function<void(double t, array& Y, array& ret)>;
+using ftype = std::function<void(fpoint_t t, array& Y, array& ret)>;
 
 class ODE {
     protected:
         int nd;
     public:
-        double t = 0;
-        double dt = 0.001;
+        fpoint_t t = 0;
+        fpoint_t dt = 0.001;
         int steps = 0;
         int f_evals = 0;
         std::string name = "ODE";
@@ -36,7 +37,7 @@ class FirstOrderODE : public ODE {
         ftype f;
         array Y;
 
-        std::vector<double> _tmp;
+        std::vector<fpoint_t> _tmp;
         array tmp;
     public:
         FirstOrderODE(ftype f, array &Y0, std::string name) : ODE(name), f{f}, Y{Y0} {
@@ -69,8 +70,8 @@ class Euler : public FirstOrderODE {
 
 class EulerSymplectic : public SecondOrderODE { 
     private:
-        std::vector<double> _tmp1;
-        std::vector<double> _tmp2;
+        std::vector<fpoint_t> _tmp1;
+        std::vector<fpoint_t> _tmp2;
         array tmp1;
         array tmp2;
     public:
@@ -85,8 +86,8 @@ class EulerSymplectic : public SecondOrderODE {
 
 class LeapFrog : public SecondOrderODE { 
     private:
-        std::vector<double> _tmp1;
-        std::vector<double> _tmp2;
+        std::vector<fpoint_t> _tmp1;
+        std::vector<fpoint_t> _tmp2;
         array tmp1;
         array tmp2;
     public:
@@ -101,11 +102,11 @@ class LeapFrog : public SecondOrderODE {
 
 class RK2 : public FirstOrderODE {
     private:
-        double theta = 0.5;
+        fpoint_t theta = 0.5;
         
-        std::vector<double> _k1;
-        std::vector<double> _k2;
-        std::vector<double> _tmp;
+        std::vector<fpoint_t> _k1;
+        std::vector<fpoint_t> _k2;
+        std::vector<fpoint_t> _tmp;
 
         array k1;
         array k2;
@@ -125,12 +126,12 @@ class RK2 : public FirstOrderODE {
 
 class RK4 : public FirstOrderODE {
     private:
-        std::vector<double> _k1;
-        std::vector<double> _k2;
-        std::vector<double> _k3;
-        std::vector<double> _k4;
+        std::vector<fpoint_t> _k1;
+        std::vector<fpoint_t> _k2;
+        std::vector<fpoint_t> _k3;
+        std::vector<fpoint_t> _k4;
 
-        std::vector<double> _tmp;
+        std::vector<fpoint_t> _tmp;
 
         array k1;
         array k2;
@@ -159,10 +160,10 @@ class RK4 : public FirstOrderODE {
 
 class RK45 : public FirstOrderODE {
     private:
-        double base_dt;
-        double eps = 1e-12;
-        double A[6] = {2.0/9.0, 1.0/3.0, 3.0/4.0, 1, 5.0/6.0};
-        double B[6][5] = {
+        fpoint_t base_dt;
+        fpoint_t eps = A_TOL;
+        fpoint_t A[6] = {2.0/9.0, 1.0/3.0, 3.0/4.0, 1, 5.0/6.0};
+        fpoint_t B[6][5] = {
             {0,           0,           0,           0,         0},
             {2.0/9.0,     0,           0,           0,         0},
             {1.0/12.0,    1.0/4.0,     0,           0,         0},
@@ -170,16 +171,16 @@ class RK45 : public FirstOrderODE {
             {-17.0/12.0,  27.0/4.0,   -27.0/5.0,    16.0/15.0, 0},
             {65.0/432.0, -5.0/16.0,    13.0/16.0,   4.0/27.0,  5.0/144.0}
         };
-        double c[6] = {1.0/9.0, 0, 9.0/20.0, 16.0/45.0, 1.0/12.0};
-        double ch[6] = {47.0/450.0, 0, 12.0/25.0, 32.0/225.0, 1.0/30.0, 6.0/25.0};
+        fpoint_t c[6] = {1.0/9.0, 0, 9.0/20.0, 16.0/45.0, 1.0/12.0};
+        fpoint_t ch[6] = {47.0/450.0, 0, 12.0/25.0, 32.0/225.0, 1.0/30.0, 6.0/25.0};
 
-        std::vector<double> _k1;
-        std::vector<double> _k2;
-        std::vector<double> _k3;
-        std::vector<double> _k4;
-        std::vector<double> _k5;
-        std::vector<double> _k6;
-        std::vector<double> _tmp;
+        std::vector<fpoint_t> _k1;
+        std::vector<fpoint_t> _k2;
+        std::vector<fpoint_t> _k3;
+        std::vector<fpoint_t> _k4;
+        std::vector<fpoint_t> _k5;
+        std::vector<fpoint_t> _k6;
+        std::vector<fpoint_t> _tmp;
 
         array k1;
         array k2;
@@ -214,28 +215,28 @@ class RK45 : public FirstOrderODE {
 
 class DOP853 : public FirstOrderODE {
     private:
-        double base_dt;    
-        double a_tol = 1e-12;
-        double r_tol = 0;
+        fpoint_t base_dt;    
+        fpoint_t a_tol = A_TOL;
+        fpoint_t r_tol = R_TOL;
 
-        double beta = 0;
+        fpoint_t beta = 0;
 
-        double safe = 0.9;
-        double fac1 = 0.3333;
-        double facc1 = 1.0 / fac1;
-        double facold = 1e-4;
+        fpoint_t safe = 0.9;
+        fpoint_t fac1 = 0.3333;
+        fpoint_t facc1 = 1.0 / fac1;
+        fpoint_t facold = 1e-4;
 
-        std::vector<double>  _k1;
-        std::vector<double>  _k2;
-        std::vector<double>  _k3;
-        std::vector<double>  _k4;
-        std::vector<double>  _k5;
-        std::vector<double>  _k6;
-        std::vector<double>  _k7;
-        std::vector<double>  _k8;
-        std::vector<double>  _k9;
-        std::vector<double> _k10;
-        std::vector<double> _tmp;
+        std::vector<fpoint_t>  _k1;
+        std::vector<fpoint_t>  _k2;
+        std::vector<fpoint_t>  _k3;
+        std::vector<fpoint_t>  _k4;
+        std::vector<fpoint_t>  _k5;
+        std::vector<fpoint_t>  _k6;
+        std::vector<fpoint_t>  _k7;
+        std::vector<fpoint_t>  _k8;
+        std::vector<fpoint_t>  _k9;
+        std::vector<fpoint_t> _k10;
+        std::vector<fpoint_t> _tmp;
 
         array  k1;
         array  k2;

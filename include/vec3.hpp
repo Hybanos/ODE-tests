@@ -2,10 +2,12 @@
 
 #include <iostream>
 
+#include "defs.hpp"
+
 struct vec3 {
-    double x;
-    double y;
-    double z;
+    fpoint_t x;
+    fpoint_t y;
+    fpoint_t z;
 
     inline vec3 operator-() {
         return vec3{-x, -y, -z};
@@ -27,31 +29,31 @@ struct vec3 {
         return vec3{x / v.x, y / v.y, z / v.z};
     }
 
-    inline vec3 operator+(double d) {
+    inline vec3 operator+(fpoint_t d) {
         return vec3{x + d, y + d, z + d};
     }
 
-    inline vec3 operator-(double d) {
+    inline vec3 operator-(fpoint_t d) {
         return vec3{x - d, y - d, z - d};
     }
 
-    inline vec3 operator*(double d) {
+    inline vec3 operator*(fpoint_t d) {
         return vec3{x * d, y * d, z * d};
     }
 
-    inline vec3 operator/(double d) {
+    inline vec3 operator/(fpoint_t d) {
         return vec3{x / d, y / d, z / d};
     }
 
-    inline double dist_squared(vec3 o) {
+    inline fpoint_t dist_squared(vec3 o) {
         return (x - o.x) * (x - o.x) + (y - o.y) * (y - o.y) + (z - o.z) * (z - o.z);
     }
 
-    inline double dist(vec3 o) {
+    inline fpoint_t dist(vec3 o) {
         return std::sqrt(dist_squared(o));
     }
 
-    inline double norm() {
+    inline fpoint_t norm() {
         return std::sqrt(x * x + y * y + z * z);
     }
 
@@ -63,11 +65,11 @@ struct vec3 {
         return vec3{y*v.z - z*v.y, z*v.x - x*v.z, x*v.y - y*v.x};
     }
 
-    inline double dot(vec3 v) {
+    inline fpoint_t dot(vec3 v) {
         return (*this * v).norm();
     }
 
-    inline double reduce() {
+    inline fpoint_t reduce() {
         return x + y + z;
     }
 
