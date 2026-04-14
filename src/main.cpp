@@ -3,7 +3,7 @@
 
 #include "system.hpp"
 
-config c(40, 10, 30);
+config c(200, 10, 30);
 std::ofstream f; 
 
 template <typename T>
