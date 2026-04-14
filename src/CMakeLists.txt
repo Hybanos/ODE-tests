@@ -1,19 +1,20 @@
 include_directories(../include)
 
-add_executable(main)
-target_sources(main PRIVATE
-    main.cpp
-    system.cpp
-    odes.cpp
-)
-target_link_libraries(main PRIVATE mdspan::mdspan)
-target_compile_features(main PRIVATE cxx_std_23)
+set(EXEC main bench)
 
-add_executable(bench)
-target_sources(bench PRIVATE
-    bench.cpp
-    system.cpp
-    odes.cpp
-)
-target_link_libraries(bench PRIVATE mdspan::mdspan)
-target_compile_features(bench PRIVATE cxx_std_23)
+foreach(X IN LISTS EXEC)
+    add_executable(${X})
+    target_sources(${X} PRIVATE
+        ${X}.cpp
+        system.cpp
+    )
+
+    if(OPT)
+        target_sources(${X} PRIVATE odes_opt.cpp)
+    else()
+        target_sources(${X} PRIVATE odes.cpp)
+    endif()
+
+    target_link_libraries(${X} PRIVATE mdspan::mdspan OpenMP::OpenMP_CXX)
+    target_compile_features(${X} PRIVATE cxx_std_23)
+endforeach()

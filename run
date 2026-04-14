@@ -1,5 +1,10 @@
 #!/usr/bin/bash
 
+export OMP_NUM_THREADS=$(lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l)
+# export OMP_NUM_THREADS=1
+export OMP_PROC_BIND=true
+export OMP_PLACES=cores
+
 build=""
 
 if [ -f /usr/bin/ninja ]; then
@@ -7,7 +12,7 @@ if [ -f /usr/bin/ninja ]; then
 fi
 
 # cmake -B build $build -DCMAKE_BUILD_TYPE=Release || exit
-cmake -B build $build -DCMAKE_BUILD_TYPE=Debug -DA_TOL=1e-10 -DFPOINT_T=double || exit
+cmake -B build $build -DCMAKE_BUILD_TYPE=Debug -DA_TOL=1e-10 -DFPOINT_T=double -DOPT=ON || exit
 cmake --build build || exit
 
 build/src/main exit
