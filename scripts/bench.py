@@ -34,16 +34,31 @@ def no_save():
         print("")
 
     for name, sub in data.items():
-        plt.plot(sizes, sub["times"] * 1e9 / target_t, label=name)
+        plt.plot(sizes, sub["times"], label=name)
 
-    plt.title("accel. f. evaluation efficiency")
+    plt.title("Raw time")
     plt.yscale("log", base=10)
     plt.xlabel("bodies")
-    plt.ylabel("ns / final t")
+    plt.ylabel("time (s)")
     plt.grid(True)
     plt.xscale("log", base=2)
     plt.legend()
-    plt.show()
+    plt.savefig("scripts/imgs/raw_time.svg")
+    plt.cla()
+
+    for name, sub in data.items():
+        plt.plot(sizes, sub["times"] * 1e9 / sub["steps"], label=name)
+
+    plt.title("Time per step")
+    plt.yscale("log", base=10)
+    plt.xlabel("bodies")
+    plt.ylabel("time (ns)")
+    plt.grid(True)
+    plt.xscale("log", base=2)
+    plt.legend()
+    plt.savefig("scripts/imgs/time_per_step.svg")
+    plt.cla()
+
 
 def save():
     data = {}
@@ -128,5 +143,5 @@ def save():
     plt.legend()
     plt.savefig(f"scripts/imgs/err_all_momentum.svg")
 
-# no_save()
+no_save()
 save()

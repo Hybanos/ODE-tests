@@ -2,7 +2,12 @@ import weasyprint
 import os
 
 def scaling():
-    return "<h1>Benchmarks</h1>"
+    out = "<h1>Benchmarks</h1>"
+
+    out += "<img src='./scripts/imgs/raw_time.svg'/>"
+    out += "<img src='./scripts/imgs/time_per_step.svg'/>"
+
+    return out
 
 def errors():
     out = "<h1>Errors</h1>"
