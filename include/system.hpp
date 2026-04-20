@@ -105,30 +105,33 @@ System<Integrator>::System(config &_c, bool _save_results) : c{_c}, save_results
 
 template <typename Integrator>
 void System<Integrator>::compute_ac(fpoint_t t, array &Y, array &ret) {
-    vecarray x_v = vecarray((vec3 *) Y.data_handle(), bodies);
-    vecarray v_v = vecarray((vec3 *) Y.data_handle() + bodies, bodies);
+    vecarray src_x = vecarray((vec3 *) Y.data_handle(), bodies);
+    vecarray src_v = vecarray((vec3 *) Y.data_handle() + bodies, bodies);
+    array src_m = array(Y.data_handle() + bodies * 6, bodies);
     vecarray ret_v = vecarray((vec3 *) ret.data_handle(), bodies);
     vecarray ret_a = vecarray((vec3 *) ret.data_handle() + bodies, bodies);
+    array ret_m = array(ret.data_handle() + bodies * 6, bodies);
 
     for (int i = 0; i < bodies; i++) {
         vec3 a_i = vec3{0, 0, 0};
 
         for (int j = 0; j < i; j++) {
-            vec3 r = x_v[j] - x_v[i];
+            vec3 r = src_x[j] - src_x[i];
             fpoint_t r_norm = r.norm();
             fpoint_t r3 = r_norm * r_norm * r_norm + eps_r; 
-            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+            a_i = a_i + r * gamma * src_m[i] * src_m[j] / r3;
         }
 
         for (int j = i+1; j < bodies; j++) {
-            vec3 r = x_v[j] - x_v[i];
+            vec3 r = src_x[j] - src_x[i];
             fpoint_t r_norm = r.norm();
             fpoint_t r3 = r_norm * r_norm * r_norm + eps_r; 
-            a_i = a_i + r * gamma * m[i] * m[j] / r3;
+            a_i = a_i + r * gamma * src_m[i] * src_m[j] / r3;
         }
 
-        ret_a[i] = a_i / m[i];
-        ret_v[i] = v_v[i];
+        ret_a[i] = a_i / src_m[i];
+        ret_v[i] = src_v[i];
+        ret_m[i] = 0;
     } 
 }
 
@@ -176,16 +179,20 @@ void System<Integrator>::run() {
 
     time_point<high_resolution_clock> t1 = high_resolution_clock::now();
 
-    compute_energies();
-    compute_angular_momentum();
-    if (save_results) save(f);
+    if (save_results) {
+        compute_energies();
+        compute_angular_momentum();
+        save(f);
+    } 
     while (integrator->t < c.target_t) {
         integrator->t += integrator->dt;
         integrator->step();
         integrator->steps++;
-        compute_energies();
-        compute_angular_momentum();
-        if (save_results) save(f);
+        if (save_results) {
+            compute_energies();
+            compute_angular_momentum();
+            save(f);
+        }
     }
 
     f.close();

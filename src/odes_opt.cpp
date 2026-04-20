@@ -1,5 +1,12 @@
 #include "odes.hpp"
 
+void ff(fpoint_t t, array &Y, array &ret) {
+    int nd = Y.extent(0);
+    for (int i = 0; i < nd; i++) {
+        ret[i] = Y[i];
+    }
+}
+
 void Euler::step() {
     f(t, Y, tmp);
     for (int i = 0; i < nd; i++) {
@@ -127,86 +134,97 @@ void DOP853::step() {
     fpoint_t fac = 0.0;
     fpoint_t fac11 = 0.0;
     do {
-        #pragma omp parallel
-        {
-            f(t, Y, k1);
-            #pragma omp for
+        // {
+            ff(t, Y, k1);
             for (int i = 0; i < nd; i++) {
                 tmp[i] = Y[i] + (k1[i] * a21) * dt;
             }
 
-            f(t, tmp, k2);
-            #pragma omp for
+            ff(t, tmp, k2);
             for (int i = 0; i < nd; i++) {
                 tmp[i] = Y[i] + (k1[i] * a31 + k2[i] * a32) * dt;
             }
 
-            f(t, tmp, k3);
-            #pragma omp for
+            ff(t, tmp, k3);
             for (int i = 0; i < nd; i++) {
                 tmp[i] = Y[i] + (k1[i] * a41 + k3[i] * a43) * dt;
             }
 
-            f(t, tmp, k4);
-            #pragma omp for
+            ff(t, tmp, k4);
             for (int i = 0; i < nd; i++) {
                 tmp[i] = Y[i] + (k1[i] * a51 + k3[i] * a53 + k4[i] * a54) * dt;
             }
 
-            f(t, tmp, k5);
-            #pragma omp for
+            ff(t, tmp, k5);
             for (int i = 0; i < nd; i++) {
                 tmp[i] = Y[i] + (k1[i] * a61 + k4[i] * a64 + k5[i] * a65) * dt;
             }
 
-            f(t, tmp, k6);
-            #pragma omp for
+            ff(t, tmp, k6);
             for (int i = 0; i < nd; i++) {
                 tmp[i] = Y[i] + (k1[i] * a71 + k4[i] * a74 + k5[i] * a75 + k6[i] * a76) * dt;
             }
 
-            f(t, tmp, k7);
-            #pragma omp for
+            ff(t, tmp, k7);
             for (int i = 0; i < nd; i++) {
                 tmp[i] = Y[i] + (k1[i] * a81 + k4[i] * a84 + k5[i] * a85 + k6[i] * a86 + k7[i] * a87) * dt;
             }
 
-            f(t, tmp, k8);
-            #pragma omp for
+            ff(t, tmp, k8);
             for (int i = 0; i < nd; i++) {
                 tmp[i] = Y[i] + (k1[i] * a91 + k4[i] * a94 + k5[i] * a95 + k6[i] * a96 + k7[i] * a97
                         + k8[i] * a98) * dt;
             }
 
-            f(t, tmp, k9);
-            #pragma omp for
+            ff(t, tmp, k9);
             for (int i = 0; i < nd; i++) {
                 tmp[i] = Y[i] + (k1[i] * a101 + k4[i] * a104 + k5[i] * a105 + k6[i] * a106 
                         + k7[i] * a107 + k8[i] * a108 + k9[i] * a109) * dt;
             }
 
-            f(t, tmp, k10);
-            #pragma omp for
+            ff(t, tmp, k10);
             for (int i = 0; i < nd; i++) {
-                tmp[i] = Y[i] + (k1[i] * a111 + k4[i] * a114 + k5[i] * a115 + k6[i] * a116 
-                        + k7[i] * a117 + k8[i] * a118 + k9[i] * a119 + k10[i] * a1110) * dt;
+                tmp[i] = Y[i] + (
+                    k1[i] * a111 + 
+                    k4[i] * a114 + 
+                    k5[i] * a115 + 
+                    k6[i] * a116 + 
+                    k7[i] * a117 + 
+                    k8[i] * a118 + 
+                    k9[i] * a119 + 
+                    k10[i] * a1110
+                ) * dt;
             }
 
             // k2 reuse !! not a bug !! 
-            f(t, tmp, k2);
-            #pragma omp for
+            ff(t, tmp, k2);
             for (int i = 0; i < nd; i++) {
-                tmp[i] = Y[i] + (k1[i] * a121 + k4[i] * a124 + k5[i] * a125 + k6[i] * a126 
-                        + k7[i] * a127 + k8[i] * a128 + k9[i] * a129 + k10[i] * a1210 + k2[i] * a1211) * dt;
+                // fpoint_t _1 = k1[i] * a121 + k4[i] * a124 + k5[i] * a125 + k6[i] * a126;
+                // fpoint_t _2 = k7[i] * a127 + k8[i] * a128 + k9[i] * a129 + k10[i] * a1210 + k2[i] * a1211;
+                // tmp[i] = Y[i] + (_1 + _2) * dt;
+                tmp[i] = Y[i] + (
+                    k1[i] * a121 + 
+                    k4[i] * a124 + 
+                    k5[i] * a125 + 
+                    k6[i] * a126 + 
+                    k7[i] * a127 + 
+                    k8[i] * a128 + 
+                    k9[i] * a129 + 
+                    k10[i] * a1210 + 
+                    k2[i] * a1211
+                ) * dt;
             }
 
             // same for k3 !!1!
-            f(t, tmp, k3);
-            #pragma omp for
+            ff(t, tmp, k3);
             for (int i = 0; i < nd; i++) {
                 k4[i] = k1[i] * b1 + k6[i] * b6 + k7[i] * b7 + k8[i] * b8 + k9[i] * b9 + k10[i] * b10 + k2[i] * b11 + k3[i] * b12;
-                k5[i] = Y[i] + k4[i] * dt;
             } 
+            // we get better vectorization when splitting this loop, 
+            // but a slightly worst walltime
+            for (int i = 0; i < nd; i++) {
+                k5[i] = Y[i] + k4[i] * dt;
+            }
 
             // error estimation
             err = 0.0;
@@ -227,7 +245,7 @@ void DOP853::step() {
             fac = fac11 / std::pow(facold, beta);
             fac = std::max((fpoint_t) 1.0/6, std::min(facc1, fac/safe));
             // std::cout << steps << " " << dt << " " << err << std::endl;
-        }
+        // }
 
         f_evals += 12;
         if (err < 1.0) {
@@ -239,7 +257,6 @@ void DOP853::step() {
     } while (1);
 
     // we skip both stiffness detection and dense output prep
-    #pragma omp parallel for
     for (int i = 0; i < nd; i++) {
         Y[i] = k5[i];
     }
