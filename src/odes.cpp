@@ -227,6 +227,8 @@ void DOP853::step() {
     }
 }
 
+// reference DOP853 implementation, ugly code don't look
+
 ref_ftype haha;
 std::ofstream fout;
 int ndims;
@@ -248,7 +250,22 @@ void dop_ref_solout(int *nr, double *xold, double *X, double *Y,
           << v[i].x << ";" << v[i].y << ";" << v[i].z << ";";
     }
 
-    fout << -1 << ";" << -1 << ";" << -1 << ";" << -1 
+    double gamma = 1.0;
+    double K = 0.0;
+    double U = 0.0;
+    for (int i = 0; i < bodies; i++) {
+        K += v[i].norm() * v[i].norm() * m[i] / 2.0;
+        for (int j = i+1; j < m.size(); j++) {
+            U += -gamma * m[i] * m[j] / (x[j] - x[i]).norm();
+        }
+    }
+
+    vec3 A = vec3{0, 0, 0}; 
+    for (int i = 0; i < bodies; i++) {
+        A = A + v[i].prod(x[i]);
+    }
+
+    fout << A.norm() << ";" << K << ";" << U << ";" << K+U
       << std::endl;
 }
 
@@ -279,8 +296,8 @@ void DOP853_ref::step() {
     int ipar = 0;
     int idid = 0;
 
-    for (int i = 0; i< lwork; i++) work[i] = 0.0;
-    for (int i = 0; i< liwork; i++) iwork[i] = 0;
+    for (int i = 0; i < lwork; i++) work[i] = 0.0;
+    for (int i = 0; i < liwork; i++) iwork[i] = 0;
 
     // std::cout << (void *) dop_ref_f_wrapper << std::endl;
 
@@ -289,6 +306,9 @@ void DOP853_ref::step() {
         &xend, &rtol, &atol, &itol, (void *)dop_ref_solout, 
         &iout, work, &lwork, iwork, &liwork, 
         &rpar, &ipar, &idid);
-    t = 10;
     fout.close();
+    t = 10;
+    // std::cout << t << std::endl;
+    f_evals = iwork[16];
+    steps = iwork[18];
 }

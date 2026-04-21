@@ -35,8 +35,7 @@ def no_save():
 
     for name, sub in data.items():
         plt.plot(sizes, sub["times"], label=name)
-
-    plt.title("Raw time")
+    plt.title("Total time")
     plt.yscale("log", base=10)
     plt.xlabel("bodies")
     plt.ylabel("time (s)")
@@ -48,7 +47,6 @@ def no_save():
 
     for name, sub in data.items():
         plt.plot(sizes, sub["times"] * 1e9 / sub["steps"], label=name)
-
     plt.title("Time per step")
     plt.yscale("log", base=10)
     plt.xlabel("bodies")
@@ -59,6 +57,17 @@ def no_save():
     plt.savefig("scripts/imgs/time_per_step.svg")
     plt.cla()
 
+    for name, sub in data.items():
+        plt.plot(sizes, sub["f_evals"] / sub["steps"], label=name)
+    plt.title("f() calls per step")
+    # plt.yscale("log", base=10)
+    plt.xlabel("bodies")
+    plt.ylabel("calls")
+    plt.grid(True)
+    plt.xscale("log", base=2)
+    plt.legend()
+    plt.savefig("scripts/imgs/f_evals_per_step.svg")
+    plt.cla()
 
 def save():
     data = {}
@@ -69,7 +78,7 @@ def save():
 
     for i, s, t in zip(list(range(max_n)), sizes, target_ts):
         print(f"{s} bodies. target_t: {t}")
-        out = subprocess.run(["./build/src/bench", str(s), str(t), "30", "true"], capture_output=True)
+        out = subprocess.run(["./build/src/bench", str(s), str(t), "3000", "true"], capture_output=True)
         strout = out.stdout.decode()
         for l in strout.strip().split("\n"):
             print(l)
