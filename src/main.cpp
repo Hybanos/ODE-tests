@@ -23,6 +23,7 @@ int main() {
     // haha<System<RK4>>();
     // haha<System<RK45>>();
     haha<System<DOP853>>();
+    haha<System<DOP853_ref>>();
 
     f.close();
 }

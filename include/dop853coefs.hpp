@@ -2,7 +2,7 @@
 
 #include "defs.hpp"
 
-namespace dop853 {
+namespace dop853_coefs {
 
 const fpoint_t c2  = 0.526001519587677318785587544488e-01;
 const fpoint_t c3  = 0.789002279381515978178381316732e-01;

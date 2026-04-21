@@ -15,7 +15,7 @@ fi
 cmake -B build $build -DCMAKE_BUILD_TYPE=Release -DA_TOL=1e-10 -DFPOINT_T=double -DOPT=OFF || exit
 cmake --build build || exit
 
-build/src/main exit
+build/src/main || exit
 
 cd scripts
 

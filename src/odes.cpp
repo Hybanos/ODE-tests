@@ -118,7 +118,7 @@ void RK45::step() {
 }
 
 void DOP853::step() {
-    using namespace dop853;
+    using namespace dop853_coefs;
 
     // NOTE: ref impl takes an educated guess on the value of dt for step 0,
     // we're skipping that i'm lazy
@@ -225,4 +225,70 @@ void DOP853::step() {
     for (int i = 0; i < nd; i++) {
         Y[i] = k5[i];
     }
+}
+
+ref_ftype haha;
+std::ofstream fout;
+int ndims;
+
+void dop_ref_solout(int *nr, double *xold, double *X, double *Y, 
+                    int *n, double *con, int *icomp, int *nrd, 
+                    int *rpar, int *ipar, int *irtrn, double *xout) {
+
+    int bodies = ndims / 7;
+    vecarray x = vecarray((vec3 *) Y, bodies);
+    vecarray v = vecarray((vec3 *) Y + bodies, bodies);
+    array m = array(Y + bodies * 6, bodies);
+
+    fout << std::setprecision(10)
+      << bodies << ";" << *nr << ";" << *X << ";";
+    for (int i = 0; i < bodies; i++) {
+        fout << m[i] << ";" 
+          << x[i].x << ";" << x[i].y << ";" << x[i].z << ";"
+          << v[i].x << ";" << v[i].y << ";" << v[i].z << ";";
+    }
+
+    fout << -1 << ";" << -1 << ";" << -1 << ";" << -1 
+      << std::endl;
+}
+
+void dop_ref_f_wrapper(int *n, double *t, double * X, double * F, double *idk, int *idk2) {
+    haha(n, t, X, F, idk, idk2);
+}
+
+void DOP853_ref::step() {
+    int n = Y.extent(0);
+    ndims = n;
+    haha = [&](int *n, double *t, double * X, double * F, double *idk, int *idk2){
+        array x(X, *n);
+        array f(F, *n);
+        this->f(this->t, x, f);
+    };
+    double x = 0.0;
+    double *y = Y.data_handle();
+    double xend = 10.0;
+    double rtol = R_TOL;
+    double atol = A_TOL;
+    int itol = 0;
+    int iout = 1;
+    int lwork = 11 * n + 21;
+    double *work = new double[lwork];
+    int liwork = 21;
+    int *iwork = new int[liwork];
+    double rpar = 0;
+    int ipar = 0;
+    int idid = 0;
+
+    for (int i = 0; i< lwork; i++) work[i] = 0.0;
+    for (int i = 0; i< liwork; i++) iwork[i] = 0;
+
+    // std::cout << (void *) dop_ref_f_wrapper << std::endl;
+
+    fout.open("DOP853-ref.txt", std::ios::app);
+    dop853(&n, (void *)dop_ref_f_wrapper, &x, Y.data_handle(), 
+        &xend, &rtol, &atol, &itol, (void *)dop_ref_solout, 
+        &iout, work, &lwork, iwork, &liwork, 
+        &rpar, &ipar, &idid);
+    t = 10;
+    fout.close();
 }

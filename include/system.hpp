@@ -8,8 +8,6 @@
 #include <vector>
 #include <iomanip>
 
-#include <mdspan/mdspan.hpp>
-
 #include "vec3.hpp"
 #include "odes.hpp"
 #include "defs.hpp"
@@ -100,6 +98,10 @@ System<Integrator>::System(config &_c, bool _save_results) : c{_c}, save_results
         }, x, v);
     } else {
        throw (std::bad_typeid());
+    }
+
+    if constexpr (std::is_same_v<DOP853_ref, Integrator>) {
+        save_results = false;
     }
 }
 

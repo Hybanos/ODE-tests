@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.26)
-project(ODE-tests)
-enable_language(CXX)
+project(ODE-tests LANGUAGES CXX Fortran)
+enable_language(C CXX Fortran)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_library(dop853 STATIC IMPORTED)
+set_target_properties(dop853 PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/libdop853.a)
 
 include(FetchContent)
 FetchContent_Declare(

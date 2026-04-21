@@ -16,6 +16,7 @@ foreach(X IN LISTS EXEC)
     endif()
 
     target_link_libraries(${X} PRIVATE mdspan::mdspan OpenMP::OpenMP_CXX)
+    target_link_libraries(${X} PRIVATE dop853 gfortran)
     target_compile_features(${X} PRIVATE cxx_std_23)
 
     target_compile_options(${X} PRIVATE -g -march=native -funroll-loops -ftree-vectorize -fno-omit-frame-pointer)

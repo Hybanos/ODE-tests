@@ -17,6 +17,7 @@ void run_all(config c, bool save) {
     haha<System<RK4>>(c, save);
     haha<System<RK45>>(c, save);
     haha<System<DOP853>>(c, save);
+    haha<System<DOP853_ref>>(c, save);
 }
 
 int main(int argc, char *argv[]) {

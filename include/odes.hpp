@@ -3,6 +3,8 @@
 #include <cmath>
 #include <vector>
 #include <functional>
+#include <fstream>
+#include <iomanip>
 
 #include <mdspan/mdspan.hpp>
 
@@ -16,6 +18,19 @@ using extents = stdex::extents<int, stdex::dynamic_extent>;
 using array = stdex::mdspan<fpoint_t, extents>;
 using vecarray = stdex::mdspan<vec3, extents>;
 using ftype = std::function<void(fpoint_t t, array& Y, array& ret)>;
+
+using ref_ftype = std::function<void(int *n, double *t, double * X, double * F, double *idk, int *idk2)>;
+using ref_solout_ftype = std::function<void(int *nr, double *xold, double *x, double *Y, 
+                    int *n, double *con, int *icomp, int *nd, 
+                    int *rpar, int *ipar, int *irtrn, double *xout)>;
+
+extern "C" {
+    void dop853(int *n, void * f,
+        double *x, double *Y, double *xend, double *rtol, double *atol, int *itol,
+        void * solout,
+        int *iout, double *work, int *lwork, int *iwork, int *liwork, double *rpar, int *ipar, int *idid
+    );
+}
 
 class ODE {
     protected:
@@ -279,4 +294,11 @@ class DOP853 : public FirstOrderODE {
             tmp =array(_tmp.data(), nd);
         }
         
+};
+
+class DOP853_ref : public FirstOrderODE {
+    private:
+    public:
+        void step();
+        DOP853_ref(ftype f, array &Y0) : FirstOrderODE(f, Y0, "DOP853-ref") {}
 };
