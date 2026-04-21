@@ -12,7 +12,7 @@ if [ -f /usr/bin/ninja ]; then
 fi
 
 # cmake -B build $build -DCMAKE_BUILD_TYPE=Release || exit
-cmake -B build $build -DCMAKE_BUILD_TYPE=Release -DA_TOL=1e-10 -DFPOINT_T=double -DOPT=OFF || exit
+cmake -B build $build -DCMAKE_BUILD_TYPE=Release -DA_TOL=1e-6 -DFPOINT_T=double -DOPT=OFF || exit
 cmake --build build || exit
 
 build/src/main || exit
@@ -24,4 +24,4 @@ if [ ! -d ./venv ]; then
      venv/bin/pip install -r ./requirements.txt || exit
 fi
 
-./venv/bin/manim -qm -p anim.py || exit
+./venv/bin/manim -p anim.py || exit

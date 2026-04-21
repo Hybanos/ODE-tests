@@ -11,10 +11,11 @@ with open("../index.txt", "r") as f:
 
 class Haha(ThreeDScene):
     def construct(self):
+        size = 4
         axes = ThreeDAxes(
-            (-4, 4, 1),
-            (-4, 4, 1),
-            (-4, 4, 1),
+            (-size, size, 1),
+            (-size, size, 1),
+            (-size, size, 1),
         )
         self.add(axes)
         self.set_camera_orientation(phi=30*DEGREES, theta=-45*DEGREES)
@@ -65,5 +66,5 @@ class Haha(ThreeDScene):
         self.begin_ambient_camera_rotation(rate=0.5)
     #    self.begin_3dillusion_camera_rotation(rate=2)
         self.play(
-            *[Create(path, run_time=5, rate_func=linear) for path in paths],
+            *[Create(path, run_time=30, rate_func=linear) for path in paths],
         )

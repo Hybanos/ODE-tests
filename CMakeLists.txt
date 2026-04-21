@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
-project(ODE-tests LANGUAGES CXX Fortran)
-enable_language(C CXX Fortran)
+project(ODE-tests LANGUAGES CXX )
+enable_language(C CXX )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
