@@ -58,6 +58,18 @@ def no_save():
     plt.cla()
 
     for name, sub in data.items():
+        plt.plot(sizes, sub["steps"], label=name)
+    plt.title("nb steps")
+    plt.yscale("log", base=10)
+    plt.xlabel("bodies")
+    plt.ylabel("steps")
+    plt.grid(True)
+    plt.xscale("log", base=2)
+    plt.legend()
+    plt.savefig("scripts/imgs/steps.svg")
+    plt.cla()
+
+    for name, sub in data.items():
         plt.plot(sizes, sub["f_evals"] / sub["steps"], label=name)
     plt.title("f() calls per step")
     # plt.yscale("log", base=10)

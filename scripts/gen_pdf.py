@@ -6,6 +6,7 @@ def scaling():
 
     out += "<img src='./scripts/imgs/raw_time.svg'/>"
     out += "<img src='./scripts/imgs/time_per_step.svg'/>"
+    out += "<img src='./scripts/imgs/steps.svg'/>"
     out += "<img src='./scripts/imgs/f_evals_per_step.svg'/>"
 
     return out
