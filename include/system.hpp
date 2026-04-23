@@ -101,6 +101,7 @@ System<Integrator>::System(config &_c, bool _save_results) : c{_c}, save_results
     }
 
     if constexpr (std::is_same_v<DOP853_ref, Integrator>) {
+        integrator->save_results = save_results;
         save_results = false;
     }
 }

@@ -10,8 +10,40 @@ if [ -f /usr/bin/ninja ]; then
      build="-G Ninja"
 fi
 
-cmake -B build $build -DCMAKE_BUILD_TYPE=Release -DA_TOL=1e-10 -DFPOINT_T=double -DOPT=ON || exit
-cmake --build build || exit
+a_tol=1e-6
+f_point=double
 
-maqao OV -R1 -xp=ov1 --replace ./build/src/main
-# open ov1/RESULTS/main_one_html/index.html 
+# gcc seq
+rm -rf build
+cmake -B build $build -DCMAKE_BUILD_TYPE=Release -DA_TOL=$a_tol -DFPOINT_T=$f_point -DOPT=OFF || exit
+cmake --build build || exit
+maqao OV -R1 -xp=maq_gcc_seq --replace ./build/src/main
+
+# gcc par
+rm -rf build
+cmake -B build $build -DCMAKE_BUILD_TYPE=Release -DA_TOL=$a_tol -DFPOINT_T=$f_point -DOPT=ON || exit
+cmake --build build || exit
+maqao OV -R1 -xp=maq_gcc_par --replace ./build/src/main
+
+
+if [ ! -f /usr/bin/clang ]; then
+     exit
+fi
+
+export CC=clang
+export CXX=clang++
+
+#clang seq
+rm -rf build
+cmake -B build $build -DCMAKE_BUILD_TYPE=Release -DA_TOL=$a_tol -DFPOINT_T=$f_point -DOPT=OFF || exit
+cmake --build build || exit
+maqao OV -R1 -xp=maq_clang_seq --replace ./build/src/main
+
+#clang par
+rm -rf build
+cmake -B build $build -DCMAKE_BUILD_TYPE=Release -DA_TOL=$a_tol -DFPOINT_T=$f_point -DOPT=ON || exit
+cmake --build build || exit
+maqao OV -R1 -xp=maq_clang_par --replace ./build/src/main
+
+
+maqao OV -CR -xp=maq_cmp --inputs=maq_gcc_seq,maq_gcc_par,maq_clang_seq,maq_clang_par

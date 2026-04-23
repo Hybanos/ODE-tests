@@ -299,6 +299,7 @@ class DOP853 : public FirstOrderODE {
 class DOP853_ref : public FirstOrderODE {
     private:
     public:
+        bool save_results = false;
         void step();
         DOP853_ref(ftype f, array &Y0) : FirstOrderODE(f, Y0, "DOP853-ref") {}
 };
