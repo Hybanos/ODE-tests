@@ -1,7 +1,6 @@
-This repo contains a few of the most common methods for solving the n-body problem.
+N-body problem solver, using a few of the most common numerical integrators.
 
 Currently implmented:
- - ~~Exact analytical solution (only for 2 bodies)~~
  - Euler
  - Symplectic Euler
  - LeapFrog
@@ -9,6 +8,7 @@ Currently implmented:
  - RK4
  - RK4(5)
  - DOP8(5,3)
+ - Reference DOP8(5,3) implementation in Fortran [link](https://www.unige.ch/~hairer/prog/nonstiff/dop853.f)
 
 https://github.com/user-attachments/assets/c05d0783-b1b9-4470-976a-01f7c282c02a
 
