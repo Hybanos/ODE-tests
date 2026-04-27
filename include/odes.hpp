@@ -19,14 +19,14 @@ using array = stdex::mdspan<fpoint_t, extents>;
 using vecarray = stdex::mdspan<vec3, extents>;
 using ftype = std::function<void(fpoint_t t, array& Y, array& ret)>;
 
-using ref_ftype = std::function<void(int *n, double *t, double * X, double * F, double *idk, int *idk2)>;
-using ref_solout_ftype = std::function<void(int *nr, double *xold, double *x, double *Y, 
+using ref_ftype = std::function<void(int *n, double *t, fpoint_t * X, fpoint_t * F, double *idk, int *idk2)>;
+using ref_solout_ftype = std::function<void(int *nr, double *xold, double *x, fpoint_t *Y, 
                     int *n, double *con, int *icomp, int *nd, 
                     int *rpar, int *ipar, int *irtrn, double *xout)>;
 
 extern "C" {
     void dop853(int *n, void * f,
-        double *x, double *Y, double *xend, double *rtol, double *atol, int *itol,
+        double *x, fpoint_t *Y, double *xend, double *rtol, double *atol, int *itol,
         void * solout,
         int *iout, double *work, int *lwork, int *iwork, int *liwork, double *rpar, int *ipar, int *idid
     );

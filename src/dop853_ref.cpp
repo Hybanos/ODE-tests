@@ -7,7 +7,7 @@ std::ofstream fout;
 int ndims;
 bool _save_results;
 
-void dop_ref_solout(int *nr, double *xold, double *X, double *Y, 
+void dop_ref_solout(int *nr, double *xold, fpoint_t*X, fpoint_t *Y, 
                     int *n, double *con, int *icomp, int *nrd, 
                     int *rpar, int *ipar, int *irtrn, double *xout) {
 
@@ -45,7 +45,7 @@ void dop_ref_solout(int *nr, double *xold, double *X, double *Y,
       << std::endl;
 }
 
-void dop_ref_f_wrapper(int *n, double *t, double * X, double * F, double *idk, int *idk2) {
+void dop_ref_f_wrapper(int *n, double *t, fpoint_t * X, fpoint_t * F, double *idk, int *idk2) {
     haha(n, t, X, F, idk, idk2);
 }
 
@@ -53,13 +53,13 @@ void DOP853_ref::step() {
     int n = Y.extent(0);
     ndims = n;
     _save_results = this->save_results;
-    haha = [&](int *n, double *t, double * X, double * F, double *idk, int *idk2){
+    haha = [&](int *n, double *t, fpoint_t * X, fpoint_t * F, double *idk, int *idk2){
         array x(X, *n);
         array f(F, *n);
         this->f(this->t, x, f);
     };
     double x = 0.0;
-    double *y = Y.data_handle();
+    fpoint_t *y = Y.data_handle();
     double xend = 10.0;
     double rtol = R_TOL;
     double atol = A_TOL;
